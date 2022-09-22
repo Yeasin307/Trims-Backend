@@ -13,6 +13,8 @@ const authRouter = require("./routes/Authentication");
 app.use("/auth", authRouter);
 const usersRouter = require("./routes/Users");
 app.use("/users", usersRouter);
+const categoriesRouter = require("./routes/Categories");
+app.use("/categories", categoriesRouter);
 
 db.sequelize.sync().then(() => {
     app.listen(5000, () => {

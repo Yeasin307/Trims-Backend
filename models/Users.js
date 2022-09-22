@@ -37,11 +37,25 @@ module.exports = (sequelize, DataTypes) => {
         }
     });
 
-    // Users.associate = (models) => {
-    //   Users.hasMany(models.Posts, {
-    //     onDelete: "cascade",
-    //   });
-    // };
+    Users.associate = (models) => {
+        Users.hasMany(models.Categories,
+            {
+                onDelete: 'RESTRICT',
+                onUpdate: 'RESTRICT',
+                foreignKey: {
+                    name: 'createdBy'
+                }
+            });
+
+        Users.hasMany(models.Categories,
+            {
+                onDelete: 'RESTRICT',
+                onUpdate: 'RESTRICT',
+                foreignKey: {
+                    name: 'updatedBy'
+                }
+            });
+    };
 
     return Users;
 };
