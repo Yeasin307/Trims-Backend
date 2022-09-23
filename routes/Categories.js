@@ -72,9 +72,14 @@ router.post("/category-details", verifyToken, async (req, res) => {
 
 router.post("/create", async (req, res) => {
     try {
-        const { name, description, parentId, createdBy, updatedBy } = req.body;
+        let { values, id } = req.body;
+        let { name, description, parentId } = values;
 
-        const category = await Categories.create({ name, description, parentId, createdBy, updatedBy });
+        if (parentId == '') {
+            parentId = null
+        }
+
+        const category = await Categories.create({ name, description, parentId, createdBy: id, updatedBy: id });
 
         if (!category) {
             res.status(400).json({ error: "Bad Request!" });

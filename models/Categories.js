@@ -8,14 +8,15 @@ module.exports = (sequelize, DataTypes) => {
         },
         name: {
             type: DataTypes.STRING(45),
-            allowNull: false
+            allowNull: false,
+            unique: true
         },
         description: {
             type: DataTypes.TEXT,
             allowNull: false
         },
         parentId: {
-            type: DataTypes.STRING(36),
+            type: DataTypes.UUID,
             defaultValue: null,
             references: {
                 model: 'Categories',
@@ -33,7 +34,7 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: '0'
         },
         createdBy: {
-            type: DataTypes.STRING(36),
+            type: DataTypes.UUID,
             allowNull: false,
             references: {
                 model: 'Users',
@@ -41,7 +42,7 @@ module.exports = (sequelize, DataTypes) => {
             }
         },
         updatedBy: {
-            type: DataTypes.STRING(36),
+            type: DataTypes.UUID,
             allowNull: false,
             references: {
                 model: 'Users',
@@ -51,16 +52,15 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Categories.associate = (models) => {
-        Categories.hasMany(models.Categories,
-            {
-                onDelete: 'RESTRICT',
-                onUpdate: 'RESTRICT',
-                as: 'Child',
-                sourceKey: 'id',
-                foreignKey: {
-                    name: 'parentId'
-                }
-            });
+        Categories.hasMany(models.Categories, {
+            onDelete: 'RESTRICT',
+            onUpdate: 'RESTRICT',
+            as: 'Child',
+            sourceKey: 'id',
+            foreignKey: {
+                name: 'parentId'
+            }
+        });
 
         Categories.belongsTo(models.Categories, {
             as: 'Parent',
@@ -70,12 +70,16 @@ module.exports = (sequelize, DataTypes) => {
         });
 
         Categories.belongsTo(models.Users, {
+            onDelete: 'RESTRICT',
+            onUpdate: 'RESTRICT',
             as: 'createdByUser',
             foreignKey: {
                 name: 'createdBy'
             }
         });
         Categories.belongsTo(models.Users, {
+            onDelete: 'RESTRICT',
+            onUpdate: 'RESTRICT',
             as: 'updatedByUser',
             foreignKey: {
                 name: 'updatedBy'

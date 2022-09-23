@@ -45,8 +45,7 @@ module.exports = (sequelize, DataTypes) => {
     Users.associate = (models) => {
         Users.hasMany(models.Categories,
             {
-                onDelete: 'RESTRICT',
-                onUpdate: 'RESTRICT',
+                sourceKey: 'id',
                 foreignKey: {
                     name: 'createdBy'
                 }
@@ -54,8 +53,7 @@ module.exports = (sequelize, DataTypes) => {
 
         Users.hasMany(models.Categories,
             {
-                onDelete: 'RESTRICT',
-                onUpdate: 'RESTRICT',
+                sourceKey: 'id',
                 foreignKey: {
                     name: 'updatedBy'
                 }
