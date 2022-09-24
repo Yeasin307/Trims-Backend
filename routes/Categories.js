@@ -95,9 +95,40 @@ router.post("/create", async (req, res) => {
 
 router.put("/update", async (req, res) => {
     try {
-        const { name, description, parentId, createdBy, updatedBy } = req.body;
+        let { values, categoryId, userId } = req.body;
+        let { name, description, parentId } = values;
 
-        const categoryUpdate = await Categories.update({ name, description, parentId, createdBy, updatedBy });
+        const categoryUpdate = await Categories.update(
+            { name, description, parentId, updatedBy: userId },
+            {
+                where: {
+                    id: categoryId
+                }
+            });
+
+        if (!categoryUpdate) {
+            res.status(400).json({ error: "Bad Request!" });
+        }
+        else {
+            res.status(200).send("Updated Category Successfully!");
+        }
+    }
+    catch (error) {
+        res.status(401).json({ error: "error" });
+    }
+});
+
+router.put("/activate-deactivate", async (req, res) => {
+    try {
+        let { id, activateDeactivate } = req.body;
+
+        const categoryUpdate = await Categories.update(
+            { active: activateDeactivate },
+            {
+                where: {
+                    id: id
+                }
+            });
 
         if (!categoryUpdate) {
             res.status(400).json({ error: "Bad Request!" });
