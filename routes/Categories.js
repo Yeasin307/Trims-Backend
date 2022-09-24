@@ -70,7 +70,7 @@ router.post("/category-details", verifyToken, async (req, res) => {
     }
 });
 
-router.post("/create", async (req, res) => {
+router.post("/create", verifyToken, async (req, res) => {
     try {
         let { values, id } = req.body;
         let { name, description, parentId } = values;
@@ -98,6 +98,10 @@ router.put("/update", async (req, res) => {
         let { values, categoryId, userId } = req.body;
         let { name, description, parentId } = values;
 
+        if (parentId == '') {
+            parentId = null
+        }
+
         const categoryUpdate = await Categories.update(
             { name, description, parentId, updatedBy: userId },
             {
@@ -120,17 +124,17 @@ router.put("/update", async (req, res) => {
 
 router.put("/activate-deactivate", async (req, res) => {
     try {
-        let { id, activateDeactivate } = req.body;
+        const { categoryId, userId, activateDeactivate } = req.body;
 
-        const categoryUpdate = await Categories.update(
-            { active: activateDeactivate },
+        const categoryActivateDeactivate = await Categories.update(
+            { active: activateDeactivate, updatedBy: userId },
             {
                 where: {
-                    id: id
+                    id: categoryId
                 }
             });
 
-        if (!categoryUpdate) {
+        if (!categoryActivateDeactivate) {
             res.status(400).json({ error: "Bad Request!" });
         }
         else {
