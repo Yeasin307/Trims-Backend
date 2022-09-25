@@ -31,6 +31,37 @@ router.get("/", verifyToken, async (req, res) => {
     }
 });
 
+router.get("/active", verifyToken, async (req, res) => {
+    try {
+        const categories = await Categories.findAll({
+            where: {
+                active: '1',
+                deleted: '0'
+            },
+            include: [
+                {
+                    as: 'Parent',
+                    model: Categories
+                },
+                {
+                    as: 'Child',
+                    model: Categories
+                }
+            ]
+        });
+
+        if (!categories) {
+            res.status(400).json({ error: "Bad Request!" });
+        }
+        else {
+            res.status(200).send(categories);
+        }
+    }
+    catch (error) {
+        res.status(401).json({ error: "error" });
+    }
+});
+
 router.post("/category-details", verifyToken, async (req, res) => {
     try {
         const { id } = req.body;
