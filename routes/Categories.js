@@ -93,7 +93,7 @@ router.post("/create", verifyToken, async (req, res) => {
     }
 });
 
-router.put("/update", async (req, res) => {
+router.put("/update", verifyToken, async (req, res) => {
     try {
         let { values, categoryId, userId } = req.body;
         let { name, description, parentId } = values;
@@ -122,7 +122,7 @@ router.put("/update", async (req, res) => {
     }
 });
 
-router.put("/activate-deactivate", async (req, res) => {
+router.put("/activate-deactivate", verifyToken, async (req, res) => {
     try {
         const { categoryId, userId, activateDeactivate } = req.body;
 
