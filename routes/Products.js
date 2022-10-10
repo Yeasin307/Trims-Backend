@@ -1,0 +1,153 @@
+const express = require("express");
+const multer = require('multer');
+const path = require("path");
+const router = express.Router();
+const { Users, Categories, Products, ProductImages } = require("../models");
+const db = require("../models");
+const { verifyToken } = require("../middlewares/AuthMiddleware");
+
+const IMAGES_UPLOADS = "./images";
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, IMAGES_UPLOADS);
+    },
+    filename: (req, file, cb) => {
+        const fileExt = path.extname(file.originalname);
+
+        const fileName = file.originalname
+            .replace(fileExt, "")
+            .toLowerCase()
+            .split(" ")
+            .join("-") + "-" + Date.now();
+
+        cb(null, fileName + fileExt);
+    },
+});
+
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 5000000, // 5MB
+    },
+    fileFilter: (req, file, cb) => {
+        if (
+            file.mimetype === "image/png" ||
+            file.mimetype === "image/gif" ||
+            file.mimetype === "image/jpg" ||
+            file.mimetype === "image/jpeg"
+        ) {
+            cb(null, true);
+        } else {
+            cb(new Error("Only .png, .gif, .jpg or .jpeg format allowed!"));
+        }
+    },
+});
+
+router.post("/create", verifyToken, upload.array("images", 5), async (req, res, next) => {
+    const t = await db.sequelize.transaction();
+
+    try {
+        const { name, categoryId, title, subtitle, description, tags, id } = req.body;
+
+        const product = await Products.create({
+            productName: name,
+            categoryId,
+            title,
+            subTitle: subtitle,
+            description,
+            tags,
+            createdBy: id,
+            updatedBy: id
+        }, { transaction: t });
+
+        for (const file of req.files) {
+            await ProductImages.create({
+                productId: product?.dataValues?.id,
+                image: file.filename,
+                extension: path.extname(file.originalname),
+                createdBy: id,
+                updatedBy: id
+            }, { transaction: t });
+        };
+
+        // const productImages = await ProductImages.bulkCreate(productImagesDetails);
+        // await t.commit();
+
+        t.commit()
+            .then(() => {
+                res.status(200).send("Created Product Successfully!");
+            })
+    }
+    catch (error) {
+        console.log(error);
+        await t.rollback();
+        res.status(500).send("Product Not Created...Try again!!!");
+    }
+});
+
+router.get("/", verifyToken, async (req, res) => {
+    try {
+        const products = await Products.findAll({
+            include: [
+                {
+                    as: 'categoryName',
+                    model: Categories
+                }
+            ]
+        });
+
+        if (!products) {
+            res.status(400).send("Bad Request!");
+        }
+        else {
+            res.status(200).send(products);
+        }
+    }
+    catch (error) {
+        res.status(401).send("Unauthorized!");
+    }
+});
+
+router.get("/viewproduct/:id", verifyToken, async (req, res) => {
+
+    try {
+        const id = req.params.id;
+
+        const product = await Products.findOne({
+            where: {
+                id: id
+            },
+            include: [
+                {
+                    as: 'categoryName',
+                    model: Categories
+                },
+                {
+                    as: 'productDetails',
+                    model: ProductImages
+                },
+                {
+                    as: 'createdByUser',
+                    model: Users
+                },
+                {
+                    as: 'updatedByUser',
+                    model: Users
+                }
+            ]
+        });
+
+        if (!product) {
+            res.status(400).send("Bad Request!");
+        }
+        else {
+            res.status(200).send(product);
+        }
+    }
+    catch (error) {
+        res.status(401).send("Unauthorized!");
+    }
+});
+
+module.exports = router;

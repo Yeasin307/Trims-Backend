@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
             unique: true
         },
         description: {
-            type: DataTypes.TEXT,
+            type: DataTypes.TEXT('medium'),
             allowNull: false
         },
         parentId: {
@@ -52,6 +52,7 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Categories.associate = (models) => {
+
         Categories.hasMany(models.Categories, {
             onDelete: 'RESTRICT',
             onUpdate: 'RESTRICT',
@@ -77,12 +78,22 @@ module.exports = (sequelize, DataTypes) => {
                 name: 'createdBy'
             }
         });
+
         Categories.belongsTo(models.Users, {
             onDelete: 'RESTRICT',
             onUpdate: 'RESTRICT',
             as: 'updatedByUser',
             foreignKey: {
                 name: 'updatedBy'
+            }
+        });
+
+        Categories.hasMany(models.Products, {
+            onDelete: 'RESTRICT',
+            onUpdate: 'RESTRICT',
+            sourceKey: 'id',
+            foreignKey: {
+                name: 'categoryId'
             }
         });
     };

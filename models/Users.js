@@ -27,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
         role_id: {
-            type: DataTypes.STRING(36),
+            type: DataTypes.CHAR(36),
             allowNull: false,
         },
         active: {
@@ -43,6 +43,7 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Users.associate = (models) => {
+
         Users.hasMany(models.Categories,
             {
                 sourceKey: 'id',
@@ -52,6 +53,38 @@ module.exports = (sequelize, DataTypes) => {
             });
 
         Users.hasMany(models.Categories,
+            {
+                sourceKey: 'id',
+                foreignKey: {
+                    name: 'updatedBy'
+                }
+            });
+
+        Users.hasMany(models.Products,
+            {
+                sourceKey: 'id',
+                foreignKey: {
+                    name: 'createdBy'
+                }
+            });
+
+        Users.hasMany(models.Products,
+            {
+                sourceKey: 'id',
+                foreignKey: {
+                    name: 'updatedBy'
+                }
+            });
+
+        Users.hasMany(models.ProductImages,
+            {
+                sourceKey: 'id',
+                foreignKey: {
+                    name: 'createdBy'
+                }
+            });
+
+        Users.hasMany(models.ProductImages,
             {
                 sourceKey: 'id',
                 foreignKey: {

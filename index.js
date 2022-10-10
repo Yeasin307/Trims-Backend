@@ -1,10 +1,14 @@
 const express = require("express");
-const app = express();
 const cors = require("cors");
 require('dotenv').config();
+const multer = require('multer');
 
-app.use(express.json());
+const app = express();
+
 app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use('/images', express.static('images'));
 
 const db = require("./models");
 
@@ -15,6 +19,21 @@ const usersRouter = require("./routes/Users");
 app.use("/users", usersRouter);
 const categoriesRouter = require("./routes/Categories");
 app.use("/categories", categoriesRouter);
+const productsRouter = require("./routes/Products");
+app.use("/products", productsRouter);
+
+app.use((err, req, res, next) => {
+    console.log(err);
+    if (err) {
+        if (err instanceof multer.MulterError) {
+            res.status(500).send("There was an upload error!");
+        } else {
+            res.status(500).send(err.message);
+        }
+    } else {
+        res.send("success");
+    }
+});
 
 db.sequelize.sync().then(() => {
     app.listen(5000, () => {
