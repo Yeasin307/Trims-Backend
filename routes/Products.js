@@ -150,4 +150,28 @@ router.get("/viewproduct/:id", verifyToken, async (req, res) => {
     }
 });
 
+router.put("/activate-deactivate", verifyToken, async (req, res) => {
+    try {
+        const { productId, userId, activateDeactivate } = req.body;
+
+        const productActivateDeactivate = await Products.update(
+            { active: activateDeactivate, updatedBy: userId },
+            {
+                where: {
+                    id: productId
+                }
+            });
+
+        if (!productActivateDeactivate) {
+            res.status(400).json({ error: "Bad Request!" });
+        }
+        else {
+            res.status(200).send("Updated Product Successfully!");
+        }
+    }
+    catch (error) {
+        res.status(401).json({ error: "error" });
+    }
+});
+
 module.exports = router;
