@@ -23,7 +23,6 @@ const productsRouter = require("./routes/Products");
 app.use("/products", productsRouter);
 
 app.use((err, req, res, next) => {
-    console.log(err);
     if (err) {
         if (err instanceof multer.MulterError) {
             res.status(500).send("There was an upload error!");

@@ -80,7 +80,6 @@ router.post("/create", verifyToken, upload.array("images", 5), async (req, res, 
             })
     }
     catch (error) {
-        console.log(error);
         await t.rollback();
         res.status(500).send("Product Not Created...Try again!!!");
     }
@@ -124,6 +123,9 @@ router.get("/viewproduct/:id", verifyToken, async (req, res) => {
                     model: Categories
                 },
                 {
+                    where: {
+                        deleted: '0'
+                    },
                     as: 'productDetails',
                     model: ProductImages
                 },
@@ -171,6 +173,74 @@ router.put("/activate-deactivate", verifyToken, async (req, res) => {
     }
     catch (error) {
         res.status(401).json({ error: "error" });
+    }
+});
+
+router.put("/image-deleted", verifyToken, async (req, res) => {
+    try {
+        const { imageId, userId } = req.body;
+
+        const imageDeleted = await ProductImages.update(
+            { deleted: '1', updatedBy: userId },
+            {
+                where: {
+                    id: imageId
+                }
+            });
+
+        if (!imageDeleted) {
+            res.status(400).send("Bad Request!");
+        }
+        else {
+            res.status(200).send("Deleted Image Successfully!");
+        }
+    }
+    catch (error) {
+        res.status(401).json({ error: "error" });
+    }
+});
+
+router.put("/update", verifyToken, upload.array("images", 4), async (req, res, next) => {
+    const t = await db.sequelize.transaction();
+
+    try {
+        const { id, name, categoryId, title, subtitle, description, tags, userId, } = req.body;
+
+        const productUpdate = await Products.update(
+            {
+                productName: name,
+                categoryId,
+                title,
+                subTitle: subtitle,
+                description,
+                tags,
+                updatedBy: userId
+            },
+            {
+                where: {
+                    id: id
+                }
+            },
+            { transaction: t });
+
+        for (const file of req.files) {
+            await ProductImages.create({
+                productId: id,
+                image: file.filename,
+                extension: path.extname(file.originalname),
+                createdBy: userId,
+                updatedBy: userId
+            }, { transaction: t });
+        };
+
+        t.commit()
+            .then(() => {
+                res.status(200).send("Updated Product Successfully!");
+            })
+    }
+    catch (error) {
+        await t.rollback();
+        res.status(500).send("Product Not Updated...Try again!!!");
     }
 });
 
