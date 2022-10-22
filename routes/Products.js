@@ -4,9 +4,9 @@ const path = require("path");
 const router = express.Router();
 const { Users, Categories, Products, ProductImages } = require("../models");
 const db = require("../models");
-const { verifyToken } = require("../middlewares/AuthMiddleware");
+const { verifyToken } = require("../middlewares/Auth");
 
-const IMAGES_UPLOADS = "./images";
+const IMAGES_UPLOADS = "./uploads/productimages";
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -39,7 +39,7 @@ const upload = multer({
         ) {
             cb(null, true);
         } else {
-            cb(new Error("Only .png, .gif, .jpg or .jpeg format allowed!"));
+            cb(new Error("Only .jpg, .jpeg, .png or .gif format allowed!"));
         }
     },
 });
@@ -80,6 +80,7 @@ router.post("/create", verifyToken, upload.array("images", 5), async (req, res, 
             })
     }
     catch (error) {
+        // unlink image if rollback
         await t.rollback();
         res.status(500).send("Product Not Created...Try again!!!");
     }

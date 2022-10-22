@@ -1,7 +1,48 @@
 const express = require("express");
+const multer = require('multer');
+const sharp = require('sharp');
+const path = require("path");
 const router = express.Router();
 const { Users, Categories } = require("../models");
-const { verifyToken } = require("../middlewares/AuthMiddleware");
+const { verifyToken } = require("../middlewares/Auth");
+
+const IMAGES_UPLOADS = "./uploads/categoryimages";
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, IMAGES_UPLOADS);
+    },
+    filename: (req, file, cb) => {
+        const fileExt = path.extname(file.originalname);
+
+        const fileName = file.originalname
+            .replace(fileExt, "")
+            .toLowerCase()
+            .split(" ")
+            .join("-") + "-" + Date.now();
+
+        cb(null, fileName + fileExt);
+    },
+});
+
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 5000000, // 5MB
+    },
+    fileFilter: (req, file, cb) => {
+        if (
+            file.mimetype === "image/png" ||
+            file.mimetype === "image/gif" ||
+            file.mimetype === "image/jpg" ||
+            file.mimetype === "image/jpeg"
+        ) {
+            cb(null, true);
+        } else {
+            cb(new Error("Only .jpg, .jpeg, .png or .gif format allowed!"));
+        }
+    },
+});
 
 router.get("/", verifyToken, async (req, res) => {
     try {
@@ -100,23 +141,32 @@ router.post("/category-details", verifyToken, async (req, res) => {
     }
 });
 
-router.post("/create", verifyToken, async (req, res) => {
+router.post("/create", verifyToken, upload.single("image"), async (req, res) => {
     try {
-        let { values, id } = req.body;
-        let { name, description, parentId } = values;
+        const resizeImagePath = path.join(__dirname, '../uploads/categoryicons', req.file.filename);
+        sharp(req.file.path)
+            .resize(60, 60)
+            .toFile(resizeImagePath, async (err, info) => {
+                if (info) {
+                    let { name, description, parentId, userId } = req.body;
 
-        if (parentId == '') {
-            parentId = null
-        }
+                    if (parentId == '') {
+                        parentId = null
+                    }
 
-        const category = await Categories.create({ name, description, parentId, createdBy: id, updatedBy: id });
+                    const category = await Categories.create({ name, description, parentId, image: req.file.filename, createdBy: userId, updatedBy: userId });
 
-        if (!category) {
-            res.status(400).json({ error: "Bad Request!" });
-        }
-        else {
-            res.status(200).send("Created Category Successfully!");
-        }
+                    if (!category) {
+                        res.status(400).json({ error: "Bad Request!" });
+                    }
+                    else {
+                        res.status(200).send("Created Category Successfully!");
+                    }
+                }
+                else {
+                    res.status(500).send(err.message);
+                }
+            });
     }
     catch (error) {
         res.status(401).json({ error: "error" });
