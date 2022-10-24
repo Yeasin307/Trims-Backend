@@ -21,6 +21,8 @@ const categoriesRouter = require("./routes/Categories");
 app.use("/categories", categoriesRouter);
 const productsRouter = require("./routes/Products");
 app.use("/products", productsRouter);
+const leadsRouter = require("./routes/Leads");
+app.use("/leads", leadsRouter);
 
 app.use((err, req, res, next) => {
     if (err) {
