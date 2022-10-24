@@ -173,9 +173,47 @@ router.post("/create", verifyToken, upload.single("image"), async (req, res) => 
     }
 });
 
-router.put("/update", verifyToken, async (req, res) => {
+router.put("/update-with-image", verifyToken, upload.single("image"), async (req, res) => {
     try {
-        let { values, categoryId, userId } = req.body;
+        const resizeImagePath = path.join(__dirname, '../uploads/categoryicons', req.file.filename);
+        sharp(req.file.path)
+            .resize(60, 60)
+            .toFile(resizeImagePath, async (err, info) => {
+                if (info) {
+                    let { name, description, parentId, categoryId, userId } = req.body;
+
+                    if (parentId == '') {
+                        parentId = null
+                    }
+
+                    const categoryUpdate = await Categories.update(
+                        { name, description, parentId, image: req.file.filename, updatedBy: userId },
+                        {
+                            where: {
+                                id: categoryId
+                            }
+                        });
+
+                    if (!categoryUpdate) {
+                        res.status(400).json({ error: "Bad Request!" });
+                    }
+                    else {
+                        res.status(200).send("Updated Category Successfully!");
+                    }
+                }
+                else {
+                    res.status(500).send(err.message);
+                }
+            });
+    }
+    catch (error) {
+        res.status(401).json({ error: "error" });
+    }
+});
+
+router.put("/update-without-image", verifyToken, async (req, res) => {
+    try {
+        const { values, categoryId, userId } = req.body;
         let { name, description, parentId } = values;
 
         if (parentId == '') {
