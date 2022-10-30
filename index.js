@@ -21,6 +21,8 @@ const categoriesRouter = require("./routes/Categories");
 app.use("/categories", categoriesRouter);
 const productsRouter = require("./routes/Products");
 app.use("/products", productsRouter);
+const componentsRouter = require("./routes/Components");
+app.use("/components", componentsRouter);
 const leadsRouter = require("./routes/Leads");
 app.use("/leads", leadsRouter);
 

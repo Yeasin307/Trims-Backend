@@ -173,6 +173,8 @@ router.post("/create", verifyToken, upload.single("image"), async (req, res) => 
     }
 });
 
+// Here i can using upload.any()
+
 router.put("/update-with-image", verifyToken, upload.single("image"), async (req, res) => {
     try {
         const resizeImagePath = path.join(__dirname, '../uploads/categoryicons', req.file.filename);

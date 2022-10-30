@@ -91,6 +91,22 @@ module.exports = (sequelize, DataTypes) => {
                     name: 'updatedBy'
                 }
             });
+
+        Users.hasMany(models.Components,
+            {
+                sourceKey: 'id',
+                foreignKey: {
+                    name: 'createdBy'
+                }
+            });
+
+        Users.hasMany(models.Components,
+            {
+                sourceKey: 'id',
+                foreignKey: {
+                    name: 'updatedBy'
+                }
+            });
     };
 
     return Users;

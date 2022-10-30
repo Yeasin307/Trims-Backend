@@ -4,15 +4,35 @@ const { Leads } = require("../models");
 const { verifyToken } = require("../MiddleWares/Auth");
 
 router.get("/", verifyToken, async (req, res) => {
-
     try {
-        const leads = await Leads.findAll();
+        const leads = await Leads.findAll({
+            order: [
+                ['leadNum', 'DESC']
+            ]
+        });
 
         if (!leads) {
             res.status(400).json({ error: "Bad Request!" });
         }
         else {
             res.status(200).send(leads);
+        }
+    }
+    catch (error) {
+        res.status(401).json({ error: "error" });
+    }
+});
+
+router.post("/create", async (req, res) => {
+    try {
+        const { email, fullName, address, phone, message } = req.body;
+        const lead = await Leads.create({ email, fullName, address, phone, message });
+
+        if (!lead) {
+            res.status(400).json({ error: "Bad Request!" });
+        }
+        else {
+            res.status(200).send("Created lead successfully!");
         }
     }
     catch (error) {
