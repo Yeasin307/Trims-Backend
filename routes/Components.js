@@ -201,6 +201,67 @@ router.put("/update", verifyToken, async (req, res) => {
     }
 });
 
+router.put("/update-with-image-file", verifyToken, upload.any(), async (req, res) => {
+    try {
+        if (req?.body?.type === "IMAGE") {
+            const { componentId, name, id, previousImages } = req.body;
+
+            const images = previousImages.split(",");
+
+            for (const file of req?.files) {
+                images.push(file?.filename);
+            }
+            const imagesObject = { images };
+
+            const updatedComponent = await Components.update(
+                { name, content: imagesObject, updatedBy: id },
+                {
+                    where: {
+                        id: componentId
+                    }
+                });
+
+            if (!updatedComponent) {
+                res.status(400).json({ error: "Bad Request!" });
+            }
+            else {
+                res.status(200).send("Component updated successfully!");
+            }
+        }
+        else if (req?.body?.type === "FILE") {
+            const { componentId, name, id, previousFiles } = req.body;
+
+            const files = previousFiles.split(",");
+
+            for (const file of req?.files) {
+                files.push(file?.filename);
+            }
+            const filesObject = { files };
+
+            const updatedComponent = await Components.update(
+                { name, content: filesObject, updatedBy: id },
+                {
+                    where: {
+                        id: componentId
+                    }
+                });
+
+            if (!updatedComponent) {
+                res.status(400).json({ error: "Bad Request!" });
+            }
+            else {
+                res.status(200).send("Component updated successfully!");
+            }
+        }
+        else {
+            res.status(400).json({ error: "Bad Request!" });
+        }
+    }
+    catch (error) {
+        res.status(401).json({ error: "error" });
+    }
+});
+
 router.put("/delete-image-file", verifyToken, async (req, res) => {
     try {
         const { type, componentId, content, userId } = req.body;
