@@ -177,6 +177,76 @@ router.post("/create", verifyToken, upload.any(), async (req, res) => {
     }
 });
 
+router.put("/update", verifyToken, async (req, res) => {
+    try {
+        const { componentId, name, content, userId } = req.body;
+
+        const componentUpdate = await Components.update(
+            { name, content, updatedBy: userId },
+            {
+                where: {
+                    id: componentId
+                }
+            });
+
+        if (!componentUpdate) {
+            res.status(400).json({ error: "Bad Request!" });
+        }
+        else {
+            res.status(200).send("Updated Component Successfully!");
+        }
+    }
+    catch (error) {
+        res.status(401).json({ error: "error" });
+    }
+});
+
+router.put("/delete-image-file", verifyToken, async (req, res) => {
+    try {
+        const { type, componentId, content, userId } = req.body;
+
+        if (type === "IMAGE") {
+            const imagesObject = { images: content };
+
+            const componentUpdate = await Components.update(
+                { content: imagesObject, updatedBy: userId },
+                {
+                    where: {
+                        id: componentId
+                    }
+                });
+
+            if (!componentUpdate) {
+                res.status(400).json({ error: "Bad Request!" });
+            }
+            else {
+                res.status(200).send("Updated Component Successfully!");
+            }
+        }
+        else if (type === "FILE") {
+            const filesObject = { files: content };
+
+            const componentUpdate = await Components.update(
+                { content: filesObject, updatedBy: userId },
+                {
+                    where: {
+                        id: componentId
+                    }
+                });
+
+            if (!componentUpdate) {
+                res.status(400).json({ error: "Bad Request!" });
+            }
+            else {
+                res.status(200).send("Updated Component Successfully!");
+            }
+        }
+    }
+    catch (error) {
+        res.status(401).json({ error: "error" });
+    }
+});
+
 router.put("/activate-deactivate", verifyToken, async (req, res) => {
     try {
         const { componentId, userId, activateDeactivate } = req.body;

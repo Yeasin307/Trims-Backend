@@ -13,10 +13,25 @@ module.exports = (sequelize, DataTypes) => {
         content: {
             type: DataTypes.JSON,
             allowNull: false,
-            get: function () {
-                return JSON.parse(this.getDataValue("content"));
+            get() {
+
+                function isJson(data) {
+                    try {
+                        JSON.parse(data);
+                    } catch (e) {
+                        return false;
+                    }
+                    return true;
+                }
+
+                const checkJson = isJson(this.getDataValue("content"));
+
+                if (this.getDataValue("content") !== undefined && checkJson) {
+                    return JSON.parse(this.getDataValue("content"));
+                }
             },
-            // set: function (value) {
+            // set(value) {
+            //     console.log(value);
             //     return this.setDataValue("content", JSON.stringify(value));
             // }
         },
