@@ -71,7 +71,7 @@ router.get("/", verifyToken, async (req, res) => {
     }
 });
 
-router.get("/active", verifyToken, async (req, res) => {
+router.get("/active", async (req, res) => {
     try {
         const categories = await Categories.findAll({
             where: {
@@ -102,7 +102,7 @@ router.get("/active", verifyToken, async (req, res) => {
     }
 });
 
-router.post("/category-details", verifyToken, async (req, res) => {
+router.post("/category-details", async (req, res) => {
     try {
         const { id } = req.body;
         const category = await Categories.findOne({
@@ -173,7 +173,7 @@ router.post("/create", verifyToken, upload.single("image"), async (req, res) => 
     }
 });
 
-// Here i can using upload.any()
+// Here I can using upload.any()
 
 router.put("/update-with-image", verifyToken, upload.single("image"), async (req, res) => {
     try {

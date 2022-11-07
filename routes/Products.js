@@ -109,6 +109,40 @@ router.get("/", verifyToken, async (req, res) => {
     }
 });
 
+router.get("/:id", async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        const products = await Products.findAll({
+            where: {
+                categoryId: id
+            },
+            include: [
+                {
+                    as: 'categoryName',
+                    model: Categories
+                },
+                {
+                    where: {
+                        deleted: '0'
+                    },
+                    as: 'productDetails',
+                    model: ProductImages
+                }
+            ]
+        });
+        if (!products) {
+            res.status(400).send("Bad Request!");
+        }
+        else {
+            res.status(200).send(products);
+        }
+    }
+    catch (error) {
+        res.status(400).send("Bad Request!");
+    }
+});
+
 router.get("/viewproduct/:id", verifyToken, async (req, res) => {
 
     try {
