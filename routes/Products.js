@@ -86,13 +86,20 @@ router.post("/create", verifyToken, upload.array("images", 5), async (req, res, 
     }
 });
 
-router.get("/", verifyToken, async (req, res) => {
+router.get("/", async (req, res) => {
     try {
         const products = await Products.findAll({
             include: [
                 {
                     as: 'categoryName',
                     model: Categories
+                },
+                {
+                    where: {
+                        deleted: '0'
+                    },
+                    as: 'productDetails',
+                    model: ProductImages
                 }
             ]
         });
