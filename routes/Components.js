@@ -3,7 +3,7 @@ const multer = require('multer');
 const path = require("path");
 const router = express.Router();
 const { Users, Components } = require("../models");
-const { verifyToken } = require("../MiddleWares/Auth");
+const { verifyToken } = require("../middlewares/Auth");
 
 const COMPONENTS_UPLOADS = "./uploads/components";
 
