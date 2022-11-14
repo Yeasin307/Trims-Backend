@@ -86,9 +86,43 @@ router.post("/create", verifyToken, upload.array("images", 5), async (req, res, 
     }
 });
 
-router.get("/", async (req, res) => {
+router.get("/", verifyToken, async (req, res) => {
     try {
         const products = await Products.findAll({
+            include: [
+                {
+                    as: 'categoryName',
+                    model: Categories
+                },
+                {
+                    where: {
+                        deleted: '0'
+                    },
+                    as: 'productDetails',
+                    model: ProductImages
+                }
+            ]
+        });
+
+        if (!products) {
+            res.status(400).send("Bad Request!");
+        }
+        else {
+            res.status(200).send(products);
+        }
+    }
+    catch (error) {
+        res.status(401).send("Unauthorized!");
+    }
+});
+
+router.get("/active", async (req, res) => {
+    try {
+        const products = await Products.findAll({
+            where: {
+                active: "1",
+                deleted: "0"
+            },
             include: [
                 {
                     as: 'categoryName',
@@ -122,7 +156,9 @@ router.get("/:id", async (req, res) => {
 
         const products = await Products.findAll({
             where: {
-                categoryId: id
+                categoryId: id,
+                active: "1",
+                deleted: "0"
             },
             include: [
                 {

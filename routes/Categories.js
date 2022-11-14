@@ -5,6 +5,7 @@ const path = require("path");
 const router = express.Router();
 const { Users, Categories } = require("../models");
 const { verifyToken } = require("../middlewares/Auth");
+const { where } = require("sequelize");
 
 const IMAGES_UPLOADS = "./uploads/categoryimages";
 
@@ -54,7 +55,12 @@ router.get("/", verifyToken, async (req, res) => {
                 },
                 {
                     as: 'Child',
-                    model: Categories
+                    model: Categories,
+                    where: {
+                        active: '1',
+                        deleted: '0'
+                    },
+                    required: false
                 }
             ]
         });
@@ -85,7 +91,12 @@ router.get("/active", async (req, res) => {
                 },
                 {
                     as: 'Child',
-                    model: Categories
+                    model: Categories,
+                    where: {
+                        active: '1',
+                        deleted: '0'
+                    },
+                    required: false
                 }
             ]
         });
@@ -116,7 +127,12 @@ router.post("/category-details", async (req, res) => {
                 },
                 {
                     as: 'Child',
-                    model: Categories
+                    model: Categories,
+                    where: {
+                        active: '1',
+                        deleted: '0'
+                    },
+                    required: false
                 },
                 {
                     as: 'createdByUser',
