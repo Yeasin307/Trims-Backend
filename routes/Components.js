@@ -108,10 +108,10 @@ router.get("/viewcomponent/:id", verifyToken, async (req, res) => {
 
 router.post("/create", verifyToken, upload.any(), async (req, res) => {
     try {
-        if (req?.body?.type === "TEXT") {
-            const { name, type, text, id } = req.body;
+        if (req?.body?.type === "ABOUT_US" || req?.body?.type === "VISION" || req?.body?.type === "MISSION" || req?.body?.type === "GOAL") {
+            const { type, title, subtitle, description, id } = req.body;
 
-            const component = await Components.create({ name, content: text, type, createdBy: id, updatedBy: id });
+            const component = await Components.create({ type, title, subtitle, description, createdBy: id, updatedBy: id });
 
             if (!component) {
                 res.status(400).json({ error: "Bad Request!" });
@@ -120,46 +120,27 @@ router.post("/create", verifyToken, upload.any(), async (req, res) => {
                 res.status(200).send("Component created successfully!");
             }
         }
-        else if (req?.body?.type === "IMAGE") {
-            const { name, type, id } = req.body;
+        else if (req?.body?.type === "HOME_SLIDER") {
+            const { type, title, subtitle, id } = req.body;
+
+            const component = await Components.create({ type, title, subtitle, image: req?.files[0]?.filename, createdBy: id, updatedBy: id });
+
+            if (!component) {
+                res.status(400).json({ error: "Bad Request!" });
+            }
+            else {
+                res.status(200).send("Component created successfully!");
+            }
+        }
+        else if (req?.body?.type === "CLIENT" || req?.body?.type === "EVENT" || req?.body?.type === "POST") {
+            const { type, title, subtitle, description, video, id } = req.body;
 
             const imagesArray = [];
             for (const file of req?.files) {
                 imagesArray.push(file?.filename);
             }
-            const imagesObject = { images: imagesArray };
 
-            const component = await Components.create({ name, content: imagesObject, type, createdBy: id, updatedBy: id });
-
-            if (!component) {
-                res.status(400).json({ error: "Bad Request!" });
-            }
-            else {
-                res.status(200).send("Component created successfully!");
-            }
-        }
-        else if (req?.body?.type === "FILE") {
-            const { name, type, id } = req.body;
-
-            const filesArray = [];
-            for (const file of req?.files) {
-                filesArray.push(file?.filename);
-            }
-            const filesObject = { files: filesArray };
-
-            const component = await Components.create({ name, content: filesObject, type, createdBy: id, updatedBy: id });
-
-            if (!component) {
-                res.status(400).json({ error: "Bad Request!" });
-            }
-            else {
-                res.status(200).send("Component created successfully!");
-            }
-        }
-        else if (req?.body?.type === "VIDEO") {
-            const { name, type, video, id } = req.body;
-
-            const component = await Components.create({ name, content: video, type, createdBy: id, updatedBy: id });
+            const component = await Components.create({ type, title, subtitle, description, image: imagesArray, video, createdBy: id, updatedBy: id });
 
             if (!component) {
                 res.status(400).json({ error: "Bad Request!" });
@@ -177,12 +158,32 @@ router.post("/create", verifyToken, upload.any(), async (req, res) => {
     }
 });
 
-router.put("/update", verifyToken, async (req, res) => {
+router.put("/update", verifyToken, upload.any(), async (req, res) => {
     try {
-        const { componentId, name, content, userId } = req.body;
+        const { type, componentId, title, subtitle, description, previousImages, video, userId } = req.body;
+
+        let images = type === 'HOME_SLIDER' ? '' : type === 'ABOUT_US' ? null : type === 'VISION' ? null : type === 'MISSION' ? null : type === 'GOAL' ? null : [];
+
+        if (previousImages) {
+            const previousImagesArray = previousImages?.split(",");
+            images = [...previousImagesArray];
+        }
+
+        if (req?.files?.length && req?.files?.length > 0) {
+            if (type === 'HOME_SLIDER') {
+                images = req?.files[0]?.filename;
+            }
+            else {
+                for (const file of req?.files) {
+                    images.push(file?.filename);
+                }
+            }
+        }
+
+        const data = images === '' ? { title, subtitle, updatedBy: userId } : { title, subtitle, description, image: images, video, updatedBy: userId }
 
         const componentUpdate = await Components.update(
-            { name, content, updatedBy: userId },
+            data,
             {
                 where: {
                     id: componentId
@@ -197,110 +198,28 @@ router.put("/update", verifyToken, async (req, res) => {
         }
     }
     catch (error) {
+        console.log(error);
         res.status(401).json({ error: "error" });
     }
 });
 
-router.put("/update-with-image-file", verifyToken, upload.any(), async (req, res) => {
+router.put("/delete-image", verifyToken, async (req, res) => {
     try {
-        if (req?.body?.type === "IMAGE") {
-            const { componentId, name, id, previousImages } = req.body;
+        const { componentId, image, userId } = req.body;
 
-            const images = previousImages.split(",");
+        const componentUpdate = await Components.update(
+            { image, updatedBy: userId },
+            {
+                where: {
+                    id: componentId
+                }
+            });
 
-            for (const file of req?.files) {
-                images.push(file?.filename);
-            }
-            const imagesObject = { images };
-
-            const updatedComponent = await Components.update(
-                { name, content: imagesObject, updatedBy: id },
-                {
-                    where: {
-                        id: componentId
-                    }
-                });
-
-            if (!updatedComponent) {
-                res.status(400).json({ error: "Bad Request!" });
-            }
-            else {
-                res.status(200).send("Component updated successfully!");
-            }
-        }
-        else if (req?.body?.type === "FILE") {
-            const { componentId, name, id, previousFiles } = req.body;
-
-            const files = previousFiles.split(",");
-
-            for (const file of req?.files) {
-                files.push(file?.filename);
-            }
-            const filesObject = { files };
-
-            const updatedComponent = await Components.update(
-                { name, content: filesObject, updatedBy: id },
-                {
-                    where: {
-                        id: componentId
-                    }
-                });
-
-            if (!updatedComponent) {
-                res.status(400).json({ error: "Bad Request!" });
-            }
-            else {
-                res.status(200).send("Component updated successfully!");
-            }
-        }
-        else {
+        if (!componentUpdate) {
             res.status(400).json({ error: "Bad Request!" });
         }
-    }
-    catch (error) {
-        res.status(401).json({ error: "error" });
-    }
-});
-
-router.put("/delete-image-file", verifyToken, async (req, res) => {
-    try {
-        const { type, componentId, content, userId } = req.body;
-
-        if (type === "IMAGE") {
-            const imagesObject = { images: content };
-
-            const componentUpdate = await Components.update(
-                { content: imagesObject, updatedBy: userId },
-                {
-                    where: {
-                        id: componentId
-                    }
-                });
-
-            if (!componentUpdate) {
-                res.status(400).json({ error: "Bad Request!" });
-            }
-            else {
-                res.status(200).send("Updated Component Successfully!");
-            }
-        }
-        else if (type === "FILE") {
-            const filesObject = { files: content };
-
-            const componentUpdate = await Components.update(
-                { content: filesObject, updatedBy: userId },
-                {
-                    where: {
-                        id: componentId
-                    }
-                });
-
-            if (!componentUpdate) {
-                res.status(400).json({ error: "Bad Request!" });
-            }
-            else {
-                res.status(200).send("Updated Component Successfully!");
-            }
+        else {
+            res.status(200).send("Updated Component Successfully!");
         }
     }
     catch (error) {

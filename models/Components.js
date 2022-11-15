@@ -6,13 +6,22 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: DataTypes.UUIDV4,
             primaryKey: true
         },
-        name: {
-            type: DataTypes.STRING(45),
+        type: {
+            type: DataTypes.ENUM('HOME_SLIDER', 'ABOUT_US', 'VISION', 'MISSION', 'GOAL', 'CLIENT', 'EVENT', 'POST'),
             allowNull: false,
         },
-        content: {
-            type: DataTypes.JSON,
+        title: {
+            type: DataTypes.TEXT,
             allowNull: false,
+        },
+        subtitle: {
+            type: DataTypes.TEXT
+        },
+        description: {
+            type: DataTypes.TEXT('long')
+        },
+        image: {
+            type: DataTypes.JSON,
             get() {
 
                 function isJson(data) {
@@ -24,21 +33,41 @@ module.exports = (sequelize, DataTypes) => {
                     return true;
                 }
 
-                const checkJson = isJson(this.getDataValue("content"));
+                const checkJson = isJson(this.getDataValue("image"));
 
-                if (this.getDataValue("content") !== undefined && checkJson) {
-                    return JSON.parse(this.getDataValue("content"));
+                if (this.getDataValue("image") !== undefined && checkJson) {
+                    return JSON.parse(this.getDataValue("image"));
                 }
             },
-            // set(value) {
-            //     console.log(value);
-            //     return this.setDataValue("content", JSON.stringify(value));
-            // }
         },
-        type: {
-            type: DataTypes.ENUM('IMAGE', 'VIDEO', 'FILE', 'TEXT'),
-            allowNull: false,
+        video: {
+            type: DataTypes.TEXT
         },
+        // content: {
+        //     type: DataTypes.JSON,
+        //     allowNull: false,
+        //     get() {
+
+        //         function isJson(data) {
+        //             try {
+        //                 JSON.parse(data);
+        //             } catch (e) {
+        //                 return false;
+        //             }
+        //             return true;
+        //         }
+
+        //         const checkJson = isJson(this.getDataValue("content"));
+
+        //         if (this.getDataValue("content") !== undefined && checkJson) {
+        //             return JSON.parse(this.getDataValue("content"));
+        //         }
+        //     },
+        //     // set(value) {
+        //     //     console.log(value);
+        //     //     return this.setDataValue("content", JSON.stringify(value));
+        //     // }
+        // },
         active: {
             type: DataTypes.ENUM('1', '0'),
             allowNull: false,
