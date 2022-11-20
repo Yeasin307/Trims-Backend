@@ -29,11 +29,12 @@ module.exports = (sequelize, DataTypes) => {
         role_id: {
             type: DataTypes.CHAR(36),
             allowNull: false,
+            defaultValue: 'admin'
         },
         active: {
             type: DataTypes.ENUM('0', '1'),
             allowNull: false,
-            defaultValue: '0'
+            defaultValue: '1'
         },
         deleted: {
             type: DataTypes.ENUM('0', '1'),

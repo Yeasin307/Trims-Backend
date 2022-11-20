@@ -20,12 +20,14 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
         address: {
-            type: DataTypes.TEXT,
-            // allowNull: false,
+            type: DataTypes.TEXT
         },
         phone: {
-            type: DataTypes.STRING(12),
-            // allowNull: false,
+            type: DataTypes.STRING(16)
+        },
+        subject: {
+            type: DataTypes.TEXT,
+            allowNull: false,
         },
         message: {
             type: DataTypes.TEXT('long'),

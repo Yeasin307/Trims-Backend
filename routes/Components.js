@@ -74,6 +74,28 @@ router.get("/", verifyToken, async (req, res) => {
     }
 });
 
+router.get("/active", async (req, res) => {
+
+    try {
+        const components = await Components.findAll({
+            where: {
+                active: "1",
+                deleted: "0"
+            }
+        });
+
+        if (!components) {
+            res.status(400).json({ error: "Bad Request!" });
+        }
+        else {
+            res.status(200).send(components);
+        }
+    }
+    catch (error) {
+        res.status(401).json({ error: error });
+    }
+});
+
 router.get("/viewcomponent/:id", verifyToken, async (req, res) => {
     try {
         const id = req.params.id;

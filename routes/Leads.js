@@ -1,7 +1,18 @@
+const nodemailer = require('nodemailer');
 const express = require("express");
 const router = express.Router();
 const { Leads } = require("../models");
 const { verifyToken } = require("../middlewares/Auth");
+
+const transporter = nodemailer.createTransport({
+    host: process.env.mail,
+    port: 465,
+    secure: true,
+    auth: {
+        user: process.env.user,
+        pass: process.env.pass
+    }
+});
 
 router.get("/", verifyToken, async (req, res) => {
     try {
@@ -25,14 +36,29 @@ router.get("/", verifyToken, async (req, res) => {
 
 router.post("/create", async (req, res) => {
     try {
-        const { email, fullName, address, phone, message } = req.body;
-        const lead = await Leads.create({ email, fullName, address, phone, message });
+        const { email, fullName, address, phone, subject, message } = req.body;
+
+        const lead = await Leads.create({ email, fullName, address, phone, subject, message });
 
         if (!lead) {
             res.status(400).json({ error: "Bad Request!" });
         }
         else {
-            res.status(200).send("Created lead successfully!");
+            const mailOptions = {
+                from: '"Trims" <noreply@asdfashionbd.com>',
+                to: 'trimsbd.info@gmail.com',
+                replyTo: email,
+                subject: subject,
+                text: message
+            };
+
+            transporter.sendMail(mailOptions, function (error, info) {
+                if (error) {
+                    res.status(400).json({ error: "Bad Request!" });
+                } else {
+                    res.status(200).send("Created lead successfully!");
+                }
+            });
         }
     }
     catch (error) {
