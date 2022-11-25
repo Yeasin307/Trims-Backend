@@ -189,7 +189,7 @@ router.post("/create", verifyToken, upload.single("image"), async (req, res) => 
     }
 });
 
-// Here I can using upload.any()
+// Here I can use upload.any()
 
 router.put("/update-with-image", verifyToken, upload.single("image"), async (req, res) => {
     try {

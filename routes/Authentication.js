@@ -1,4 +1,5 @@
 const express = require("express");
+const bcrypt = require('bcrypt');
 const router = express.Router();
 const { Op } = require("sequelize");
 const { Users } = require("../models");
@@ -15,28 +16,40 @@ router.post("/login", async (req, res) => {
             where: {
                 [Op.and]: [
                     { email: `${email}` },
-                    { password: `${password}` },
-                    { role_id: "admin" }
+                    { verified: true },
+                    { role_id: "admin" },
+                    { active: '1' }
                 ]
             }
         });
 
         if (!user) {
-
             res.status(401).json({ error: "User Doesn't Exist" });
         }
         else {
-            const token = sign(
-                { username: user.username, id: user.id },
-                process.env.JWT_SECRET,
-                {
-                    expiresIn: '1d'
-                }
-            );
+            bcrypt.compare(password, user.password, function (err, result) {
 
-            res.status(200).json({
-                "access_token": token,
-                "user": user
+                if (err) {
+                    res.status(401).json({ error: "Authentication Failed!" });
+                }
+
+                if (result) {
+                    const token = sign(
+                        { username: user.username, id: user.id },
+                        process.env.JWT_SECRET,
+                        {
+                            expiresIn: '1d'
+                        }
+                    );
+
+                    res.status(200).json({
+                        "access_token": token,
+                        "user": user
+                    });
+                }
+                else {
+                    res.status(401).json({ error: "Password not matched!" });
+                }
             });
         }
     }
