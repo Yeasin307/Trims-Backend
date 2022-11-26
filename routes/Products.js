@@ -45,9 +45,9 @@ const upload = multer({
 });
 
 router.post("/create", verifyToken, upload.array("images", 5), async (req, res, next) => {
-    const t = await db.sequelize.transaction();
 
     try {
+        const t = await db.sequelize.transaction();
         const { name, categoryId, title, subtitle, description, tags, id } = req.body;
 
         const product = await Products.create({
@@ -279,9 +279,9 @@ router.put("/image-deleted", verifyToken, async (req, res) => {
 });
 
 router.put("/update", verifyToken, upload.array("images", 4), async (req, res, next) => {
-    const t = await db.sequelize.transaction();
 
     try {
+        const t = await db.sequelize.transaction();
         const { id, name, categoryId, title, subtitle, description, tags, userId, } = req.body;
 
         const productUpdate = await Products.update(

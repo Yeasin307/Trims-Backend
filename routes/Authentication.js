@@ -1,11 +1,10 @@
 const express = require("express");
 const bcrypt = require('bcrypt');
 const router = express.Router();
+const { sign } = require("jsonwebtoken");
 const { Op } = require("sequelize");
 const { Users } = require("../models");
 const { verifyToken } = require("../middlewares/Auth");
-
-const { sign } = require("jsonwebtoken");
 
 router.post("/login", async (req, res) => {
 
