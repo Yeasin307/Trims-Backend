@@ -18,6 +18,7 @@ db.sequelize.sync()
         app.use(express.json());
         app.use(express.urlencoded({ extended: true }));
         app.use('/static', express.static('uploads'));
+        app.set('view engine', 'ejs');
 
         app.use("/auth", authRouter);
         app.use("/users", usersRouter);

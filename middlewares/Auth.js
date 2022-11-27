@@ -1,19 +1,27 @@
 const { verify } = require("jsonwebtoken");
 
 const verifyToken = (req, res, next) => {
+
     try {
         const { authorization } = req.headers;
         const token = authorization.split(' ')[1];
 
-        if (!token) return res.json({ error: "User not logged in!" });
-
-        const validToken = verify(token, process.env.JWT_SECRET);
-
-        if (validToken) {
-            return next();
+        if (!token) {
+            res.status(401).json({ error: "User Not Authorized!" });
         }
-    } catch (error) {
-        return res.json({ error: "error" });
+        else {
+            const payload = verify(token, process.env.JWT_SECRET);
+
+            if (payload) {
+                next();
+            }
+            else {
+                res.status(401).json({ error: "User Not Authorized!" });
+            }
+        }
+    }
+    catch (error) {
+        res.status(401).json({ error: "error" });
     }
 };
 
