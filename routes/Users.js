@@ -6,6 +6,7 @@ const { sign, verify } = require("jsonwebtoken");
 const { Users } = require("../models");
 const db = require("../models");
 const { verifyToken } = require("../middlewares/Auth");
+const { where } = require("sequelize");
 
 const transporter = nodemailer.createTransport({
     host: process.env.mail,
@@ -58,6 +59,38 @@ router.get("/confirmation/:token", async (req, res) => {
     }
     catch (error) {
         res.status(500).send('Internal Server Error!');
+    }
+});
+
+router.get("/reset-password/:id/:token", async (req, res) => {
+
+    try {
+        const { id, token } = req.params;
+
+        const user = await Users.findOne({
+            where: {
+                id: id
+            }
+        })
+
+        if (!user) {
+            res.status(401).send("User Not Found!");
+        }
+        else {
+            const secret = process.env.JWT_SECRET + user.password;
+
+            const payload = verify(token, secret);
+
+            if (payload) {
+                res.render('reset-password', { email: payload.email });
+            }
+            else {
+                res.status(401).send("Invalid Link!");
+            }
+        }
+    }
+    catch (error) {
+        res.status(401).send("Invalid Link!");
     }
 });
 
@@ -226,39 +259,7 @@ router.post("/forgot-password", async (req, res) => {
     catch (error) {
         res.status(500).send("Internal Server Error!");
     }
-})
-
-router.get("/reset-password/:id/:token", async (req, res) => {
-
-    try {
-        const { id, token } = req.params;
-
-        const user = await Users.findOne({
-            where: {
-                id: id
-            }
-        })
-
-        if (!user) {
-            res.status(401).send("User Not Found!");
-        }
-        else {
-            const secret = process.env.JWT_SECRET + user.password;
-
-            const payload = verify(token, secret);
-
-            if (payload) {
-                res.render('reset-password', { email: payload.email });
-            }
-            else {
-                res.status(401).send("Invalid Link!");
-            }
-        }
-    }
-    catch (error) {
-        res.status(401).send("Invalid Link!");
-    }
-})
+});
 
 router.post("/reset-password/:id/:token", async (req, res) => {
 
@@ -322,6 +323,90 @@ router.post("/reset-password/:id/:token", async (req, res) => {
     catch (error) {
         res.status(500).send("Internal Server Error!");
     }
-})
+});
+
+router.put("/update", verifyToken, async (req, res) => {
+
+    try {
+        const { firstName, lastName, username, password, newPassword, userId } = req.body;
+
+        const user = await Users.findOne({
+            where: {
+                id: userId
+            }
+        });
+
+        if (user) {
+
+            bcrypt.compare(password, user.password, async function (err, result) {
+
+                if (err) {
+                    res.status(500).send("Internal Server Error!");
+                }
+
+                if (result) {
+
+                    bcrypt.hash(newPassword, Number(process.env.saltRounds), async function (err, hash) {
+
+                        if (err) {
+                            res.status(500).send("Internal Server Error!");
+                        }
+
+                        if (hash) {
+
+                            const updatedUser = await Users.update(
+                                { username, password: hash, firstName, lastName },
+                                {
+                                    where: {
+                                        id: userId
+                                    }
+                                });
+
+                            if (updatedUser[0] > 0) {
+                                res.status(200).send('Updated Profile Successfully!');
+                            }
+                            else {
+                                res.status(400).send('Bad Request!');
+                            }
+                        }
+                    });
+                }
+                else {
+                    res.status(400).send("Password Not Matched!");
+                }
+            });
+        }
+        else {
+            res.status(400).send('Bad Request!');
+        }
+    }
+    catch (error) {
+        res.status(500).send("Internal Server Error!");
+    }
+});
+
+router.put("/activate-deactivate", verifyToken, async (req, res) => {
+    try {
+        const { userId, value } = req.body;
+
+        const userActivateDeactivate = await Users.update(
+            { active: value },
+            {
+                where: {
+                    id: userId
+                }
+            });
+
+        if (userActivateDeactivate[0] > 0) {
+            res.status(200).send("Updated User Successfully!");
+        }
+        else {
+            res.status(400).send('Bad Request!');
+        }
+    }
+    catch (error) {
+        res.status(500).send("Internal Server Error!");
+    }
+});
 
 module.exports = router;
