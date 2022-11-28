@@ -33,6 +33,7 @@ router.post("/login", async (req, res) => {
                 }
 
                 if (result) {
+
                     const token = sign(
                         { username: user.username, id: user.id },
                         process.env.JWT_SECRET,
@@ -41,10 +42,16 @@ router.post("/login", async (req, res) => {
                         }
                     );
 
-                    res.status(200).json({
-                        "access_token": token,
-                        "user": user
-                    });
+                    if (token) {
+
+                        res.status(200).json({
+                            "access_token": token,
+                            "user": user
+                        });
+                    }
+                    else {
+                        res.status(500).json({ error: "Internal Server Error!" });
+                    }
                 }
                 else {
                     res.status(401).json({ error: "Password not matched!" });
