@@ -46,7 +46,7 @@ router.post("/create", async (req, res) => {
         else {
             const mailOptions = {
                 from: '"Trims" <noreply@asdfashionbd.com>',
-                to: 'trimsbd.info@gmail.com',
+                to: 'info.trimtexbd@gmail.com',
                 replyTo: email,
                 subject: subject,
                 text: message
