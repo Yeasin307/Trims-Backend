@@ -80,7 +80,7 @@ router.post("/create", verifyToken, upload.array("images", 5), async (req, res, 
             })
     }
     catch (error) {
-        // unlink image if rollback
+        // unlink image if rollback also for update api
         await t.rollback();
         res.status(500).send("Product Not Created...Try again!!!");
     }
@@ -242,11 +242,11 @@ router.put("/activate-deactivate", verifyToken, async (req, res) => {
                 }
             });
 
-        if (!productActivateDeactivate) {
-            res.status(400).json({ error: "Bad Request!" });
+        if (productActivateDeactivate[0] > 0) {
+            res.status(200).send("Updated Product Successfully!");
         }
         else {
-            res.status(200).send("Updated Product Successfully!");
+            res.status(400).json({ error: "Bad Request!" });
         }
     }
     catch (error) {
@@ -266,11 +266,11 @@ router.put("/image-deleted", verifyToken, async (req, res) => {
                 }
             });
 
-        if (!imageDeleted) {
-            res.status(400).send("Bad Request!");
+        if (imageDeleted[0] > 0) {
+            res.status(200).send("Deleted Image Successfully!");
         }
         else {
-            res.status(200).send("Deleted Image Successfully!");
+            res.status(400).send("Bad Request!");
         }
     }
     catch (error) {
@@ -301,20 +301,27 @@ router.put("/update", verifyToken, upload.array("images", 4), async (req, res, n
             },
             { transaction: t });
 
-        for (const file of req.files) {
-            await ProductImages.create({
-                productId: id,
-                image: file.filename,
-                extension: path.extname(file.originalname),
-                createdBy: userId,
-                updatedBy: userId
-            }, { transaction: t });
-        };
+        if (productUpdate[0] > 0) {
 
-        t.commit()
-            .then(() => {
-                res.status(200).send("Updated Product Successfully!");
-            })
+            for (const file of req.files) {
+                await ProductImages.create({
+                    productId: id,
+                    image: file.filename,
+                    extension: path.extname(file.originalname),
+                    createdBy: userId,
+                    updatedBy: userId
+                }, { transaction: t });
+            };
+
+            t.commit()
+                .then(() => {
+                    res.status(200).send("Updated Product Successfully!");
+                })
+        }
+        else {
+            await t.rollback();
+            res.status(500).send("Product Not Updated...Try again!!!");
+        }
     }
     catch (error) {
         await t.rollback();

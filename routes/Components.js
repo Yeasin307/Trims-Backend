@@ -212,11 +212,11 @@ router.put("/update", verifyToken, upload.any(), async (req, res) => {
                 }
             });
 
-        if (!componentUpdate) {
-            res.status(400).json({ error: "Bad Request!" });
+        if (componentUpdate[0] > 0) {
+            res.status(200).send("Updated Component Successfully!");
         }
         else {
-            res.status(200).send("Updated Component Successfully!");
+            res.status(400).json({ error: "Bad Request!" });
         }
     }
     catch (error) {
@@ -236,11 +236,11 @@ router.put("/delete-image", verifyToken, async (req, res) => {
                 }
             });
 
-        if (!componentUpdate) {
-            res.status(400).json({ error: "Bad Request!" });
+        if (componentUpdate[0] > 0) {
+            res.status(200).send("Updated Component Successfully!");
         }
         else {
-            res.status(200).send("Updated Component Successfully!");
+            res.status(400).json({ error: "Bad Request!" });
         }
     }
     catch (error) {
@@ -260,11 +260,11 @@ router.put("/activate-deactivate", verifyToken, async (req, res) => {
                 }
             });
 
-        if (!componentActivateDeactivate) {
-            res.status(400).json({ error: "Bad Request!" });
+        if (componentActivateDeactivate[0] > 0) {
+            res.status(200).send("Updated Component Successfully!");
         }
         else {
-            res.status(200).send("Updated Component Successfully!");
+            res.status(400).json({ error: "Bad Request!" });
         }
     }
     catch (error) {

@@ -158,29 +158,41 @@ router.post("/category-details", async (req, res) => {
 });
 
 router.post("/create", verifyToken, upload.single("image"), async (req, res) => {
+
     try {
         const resizeImagePath = path.join(__dirname, '../uploads/categoryicons', req.file.filename);
+
         sharp(req.file.path)
             .resize(60, 60)
             .toFile(resizeImagePath, async (err, info) => {
-                if (info) {
-                    let { name, description, parentId, userId } = req.body;
 
-                    if (parentId == '') {
-                        parentId = null
-                    }
-
-                    const category = await Categories.create({ name, description, parentId, image: req.file.filename, createdBy: userId, updatedBy: userId });
-
-                    if (!category) {
-                        res.status(400).json({ error: "Bad Request!" });
-                    }
-                    else {
-                        res.status(200).send("Created Category Successfully!");
-                    }
+                if (err) {
+                    res.status(500).send("Internal Server Error!");
                 }
-                else {
-                    res.status(500).send(err.message);
+
+                if (info) {
+
+                    try {
+                        let { name, description, parentId, userId } = req.body;
+
+                        if (parentId == '') {
+                            parentId = null
+                        }
+
+                        const category = await Categories.create({ name, description, parentId, image: req.file.filename, createdBy: userId, updatedBy: userId });
+
+                        if (!category) {
+                            res.status(400).json({ error: "Bad Request!" });
+                        }
+                        else {
+                            res.status(200).send("Created Category Successfully!");
+                        }
+                    }
+                    catch (error) {
+                        if (error.message === "Validation error") {
+                            res.status(300).send("This category already exist!");
+                        }
+                    }
                 }
             });
     }
@@ -192,35 +204,47 @@ router.post("/create", verifyToken, upload.single("image"), async (req, res) => 
 // Here I can use upload.any()
 
 router.put("/update-with-image", verifyToken, upload.single("image"), async (req, res) => {
+
     try {
         const resizeImagePath = path.join(__dirname, '../uploads/categoryicons', req.file.filename);
+
         sharp(req.file.path)
             .resize(60, 60)
             .toFile(resizeImagePath, async (err, info) => {
-                if (info) {
-                    let { name, description, parentId, categoryId, userId } = req.body;
 
-                    if (parentId == '') {
-                        parentId = null
-                    }
-
-                    const categoryUpdate = await Categories.update(
-                        { name, description, parentId, image: req.file.filename, updatedBy: userId },
-                        {
-                            where: {
-                                id: categoryId
-                            }
-                        });
-
-                    if (!categoryUpdate) {
-                        res.status(400).json({ error: "Bad Request!" });
-                    }
-                    else {
-                        res.status(200).send("Updated Category Successfully!");
-                    }
+                if (err) {
+                    res.status(500).send("Internal Server Error!");
                 }
-                else {
-                    res.status(500).send(err.message);
+
+                if (info) {
+
+                    try {
+                        let { name, description, parentId, categoryId, userId } = req.body;
+
+                        if (parentId == '') {
+                            parentId = null
+                        }
+
+                        const categoryUpdate = await Categories.update(
+                            { name, description, parentId, image: req.file.filename, updatedBy: userId },
+                            {
+                                where: {
+                                    id: categoryId
+                                }
+                            });
+
+                        if (categoryUpdate[0] > 0) {
+                            res.status(200).send("Updated Category Successfully!");
+                        }
+                        else {
+                            res.status(400).json({ error: "Bad Request!" });
+                        }
+                    }
+                    catch (error) {
+                        if (error.message === "Validation error") {
+                            res.status(300).send("This category already exist!");
+                        }
+                    }
                 }
             });
     }
@@ -246,11 +270,11 @@ router.put("/update-without-image", verifyToken, async (req, res) => {
                 }
             });
 
-        if (!categoryUpdate) {
-            res.status(400).json({ error: "Bad Request!" });
+        if (categoryUpdate[0] > 0) {
+            res.status(200).send("Updated Category Successfully!");
         }
         else {
-            res.status(200).send("Updated Category Successfully!");
+            res.status(400).json({ error: "Bad Request!" });
         }
     }
     catch (error) {
@@ -270,11 +294,11 @@ router.put("/activate-deactivate", verifyToken, async (req, res) => {
                 }
             });
 
-        if (!categoryActivateDeactivate) {
-            res.status(400).json({ error: "Bad Request!" });
+        if (categoryActivateDeactivate[0] > 0) {
+            res.status(200).send("Updated Category Successfully!");
         }
         else {
-            res.status(200).send("Updated Category Successfully!");
+            res.status(400).json({ error: "Bad Request!" });
         }
     }
     catch (error) {

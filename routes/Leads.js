@@ -87,7 +87,7 @@ router.post("/lead-details", verifyToken, async (req, res) => {
     }
 });
 
-router.put("/seen", verifyToken, async (req, res) => {
+router.put("/seen", async (req, res) => {
     try {
         const { id } = req.body;
         const updatedLead = await Leads.update({ seen: '1' },
@@ -97,11 +97,11 @@ router.put("/seen", verifyToken, async (req, res) => {
                 }
             });
 
-        if (!updatedLead) {
-            res.status(400).json({ error: "Bad Request!" });
+        if (updatedLead[0] > 0) {
+            res.status(200).send("Updated lead successfully!");
         }
         else {
-            res.status(200).send("Updated lead successfully!");
+            res.status(400).json({ error: "Bad Request!" });
         }
     }
     catch (error) {

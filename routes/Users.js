@@ -108,7 +108,8 @@ router.post("/create", verifyToken, async (req, res) => {
             }
 
             if (hash) {
-                const user = await Users.create({ firstName, lastName, username, email, password: hash }, { transaction: t })
+
+                Users.create({ firstName, lastName, username, email, password: hash }, { transaction: t })
                     .then(async (user) => {
 
                         if (!user) {
