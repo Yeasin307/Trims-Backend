@@ -48,6 +48,10 @@ const upload = multer({
 router.get("/", verifyToken, async (req, res) => {
     try {
         const categories = await Categories.findAll({
+            order: [
+                ['position', 'ASC'],
+                [{ as: 'Child', model: Categories }, 'position', 'ASC']
+            ],
             include: [
                 {
                     as: 'Parent',
@@ -84,6 +88,10 @@ router.get("/active", async (req, res) => {
                 active: '1',
                 deleted: '0'
             },
+            order: [
+                ['position', 'ASC'],
+                [{ as: 'Child', model: Categories }, 'position', 'ASC']
+            ],
             include: [
                 {
                     as: 'Parent',
@@ -120,6 +128,9 @@ router.post("/category-details", async (req, res) => {
             where: {
                 id: id
             },
+            order: [
+                [{ as: 'Child', model: Categories }, 'position', 'ASC']
+            ],
             include: [
                 {
                     as: 'Parent',
@@ -173,13 +184,17 @@ router.post("/create", verifyToken, upload.single("image"), async (req, res) => 
                 if (info) {
 
                     try {
-                        let { name, description, parentId, userId } = req.body;
+                        let { name, description, parentId, position, userId } = req.body;
 
                         if (parentId == '') {
                             parentId = null
                         }
 
-                        const category = await Categories.create({ name, description, parentId, image: req.file.filename, createdBy: userId, updatedBy: userId });
+                        if (position == '') {
+                            position = 99999
+                        }
+
+                        const category = await Categories.create({ name, description, parentId, image: req.file.filename, position, createdBy: userId, updatedBy: userId });
 
                         if (!category) {
                             res.status(400).json({ error: "Bad Request!" });
@@ -219,14 +234,18 @@ router.put("/update-with-image", verifyToken, upload.single("image"), async (req
                 if (info) {
 
                     try {
-                        let { name, description, parentId, categoryId, userId } = req.body;
+                        let { name, description, parentId, position, categoryId, userId } = req.body;
 
                         if (parentId == '') {
                             parentId = null
                         }
 
+                        if (position == '') {
+                            position = 99999
+                        }
+
                         const categoryUpdate = await Categories.update(
-                            { name, description, parentId, image: req.file.filename, updatedBy: userId },
+                            { name, description, parentId, image: req.file.filename, position, updatedBy: userId },
                             {
                                 where: {
                                     id: categoryId
@@ -256,14 +275,18 @@ router.put("/update-with-image", verifyToken, upload.single("image"), async (req
 router.put("/update-without-image", verifyToken, async (req, res) => {
     try {
         const { values, categoryId, userId } = req.body;
-        let { name, description, parentId } = values;
+        let { name, description, parentId, position } = values;
 
         if (parentId == '') {
             parentId = null
         }
 
+        if (position == '') {
+            position = 99999
+        }
+
         const categoryUpdate = await Categories.update(
-            { name, description, parentId, updatedBy: userId },
+            { name, description, parentId, position, updatedBy: userId },
             {
                 where: {
                     id: categoryId

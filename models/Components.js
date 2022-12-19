@@ -7,18 +7,20 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true
         },
         type: {
-            type: DataTypes.ENUM('HOME_SLIDER', 'ABOUT_US', 'VISION', 'MISSION', 'GOAL', 'CLIENT', 'EVENT', 'POST'),
-            allowNull: false,
+            type: DataTypes.ENUM('HOME_SLIDER', 'ABOUT_US', 'VISION', 'MISSION', 'GOAL', 'CLIENT', 'GALLERY', 'MANAGEMENT', 'CEO_MESSAGE', 'COMPANY_PROFILE'),
+            allowNull: false
         },
         title: {
-            type: DataTypes.TEXT,
-            allowNull: false,
+            type: DataTypes.TEXT
         },
         subtitle: {
             type: DataTypes.TEXT
         },
         description: {
             type: DataTypes.TEXT('long')
+        },
+        position: {
+            type: DataTypes.INTEGER
         },
         image: {
             type: DataTypes.JSON,
@@ -39,6 +41,9 @@ module.exports = (sequelize, DataTypes) => {
                     return JSON.parse(this.getDataValue("image"));
                 }
             },
+        },
+        file: {
+            type: DataTypes.TEXT
         },
         video: {
             type: DataTypes.TEXT

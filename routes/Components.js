@@ -27,7 +27,7 @@ const storage = multer.diskStorage({
 const upload = multer({
     storage: storage,
     limits: {
-        fileSize: 10000000, // 10MB
+        fileSize: 20000000, // 20MB
     },
     fileFilter: (req, file, cb) => {
         if (file.fieldname === "images") {
@@ -60,7 +60,11 @@ const upload = multer({
 router.get("/", verifyToken, async (req, res) => {
 
     try {
-        const components = await Components.findAll();
+        const components = await Components.findAll({
+            order: [
+                ['position', 'ASC']
+            ]
+        });
 
         if (!components) {
             res.status(400).json({ error: "Bad Request!" });
@@ -81,7 +85,10 @@ router.get("/active", async (req, res) => {
             where: {
                 active: "1",
                 deleted: "0"
-            }
+            },
+            order: [
+                ['position', 'ASC']
+            ]
         });
 
         if (!components) {
@@ -130,10 +137,17 @@ router.get("/viewcomponent/:id", verifyToken, async (req, res) => {
 
 router.post("/create", verifyToken, upload.any(), async (req, res) => {
     try {
-        if (req?.body?.type === "ABOUT_US" || req?.body?.type === "VISION" || req?.body?.type === "MISSION" || req?.body?.type === "GOAL") {
-            const { type, title, subtitle, description, id } = req.body;
+        let { type, id, title, subtitle, description, position, video } = req.body;
 
-            const component = await Components.create({ type, title, subtitle, description, createdBy: id, updatedBy: id });
+        if (req?.body?.type === "HOME_SLIDER" || req?.body?.type === "GALLERY" || req?.body?.type === "MANAGEMENT") {
+            if (position === undefined) {
+                position = 99999;
+            }
+        }
+
+        if (req?.body?.type === "VISION" || req?.body?.type === "MISSION" || req?.body?.type === "GOAL") {
+
+            const component = await Components.create({ type, title, subtitle, description, position, video, createdBy: id, updatedBy: id });
 
             if (!component) {
                 res.status(400).json({ error: "Bad Request!" });
@@ -142,10 +156,9 @@ router.post("/create", verifyToken, upload.any(), async (req, res) => {
                 res.status(200).send("Component created successfully!");
             }
         }
-        else if (req?.body?.type === "HOME_SLIDER") {
-            const { type, title, subtitle, id } = req.body;
+        else if (req?.body?.type === "HOME_SLIDER" || req?.body?.type === "ABOUT_US" || req?.body?.type === "GALLERY" || req?.body?.type === "MANAGEMENT" || req?.body?.type === "CEO_MESSAGE") {
 
-            const component = await Components.create({ type, title, subtitle, image: req?.files[0]?.filename, createdBy: id, updatedBy: id });
+            const component = await Components.create({ type, title, subtitle, description, position, video, image: req?.files[0]?.filename, createdBy: id, updatedBy: id });
 
             if (!component) {
                 res.status(400).json({ error: "Bad Request!" });
@@ -154,15 +167,25 @@ router.post("/create", verifyToken, upload.any(), async (req, res) => {
                 res.status(200).send("Component created successfully!");
             }
         }
-        else if (req?.body?.type === "CLIENT" || req?.body?.type === "EVENT" || req?.body?.type === "POST") {
-            const { type, title, subtitle, description, video, id } = req.body;
+        else if (req?.body?.type === "CLIENT") {
 
             const imagesArray = [];
             for (const file of req?.files) {
                 imagesArray.push(file?.filename);
             }
 
-            const component = await Components.create({ type, title, subtitle, description, image: imagesArray, video, createdBy: id, updatedBy: id });
+            const component = await Components.create({ type, title, subtitle, description, position, video, image: imagesArray, createdBy: id, updatedBy: id });
+
+            if (!component) {
+                res.status(400).json({ error: "Bad Request!" });
+            }
+            else {
+                res.status(200).send("Component created successfully!");
+            }
+        }
+        else if (req?.body?.type === "COMPANY_PROFILE") {
+
+            const component = await Components.create({ type, title, subtitle, description, position, video, file: req?.files[0]?.filename, createdBy: id, updatedBy: id });
 
             if (!component) {
                 res.status(400).json({ error: "Bad Request!" });
@@ -182,27 +205,27 @@ router.post("/create", verifyToken, upload.any(), async (req, res) => {
 
 router.put("/update", verifyToken, upload.any(), async (req, res) => {
     try {
-        const { type, componentId, title, subtitle, description, previousImages, video, userId } = req.body;
+        const { type, componentId, title, subtitle, description, position, previousImages, video, userId } = req.body;
 
-        let images = type === 'HOME_SLIDER' ? '' : type === 'ABOUT_US' ? null : type === 'VISION' ? null : type === 'MISSION' ? null : type === 'GOAL' ? null : [];
+        let imageFile = type === 'CLIENT' ? [] : null;
 
         if (previousImages) {
             const previousImagesArray = previousImages?.split(",");
-            images = [...previousImagesArray];
+            imageFile = [...previousImagesArray];
         }
 
         if (req?.files?.length && req?.files?.length > 0) {
-            if (type === 'HOME_SLIDER') {
-                images = req?.files[0]?.filename;
+            if (type === 'CLIENT') {
+                for (const file of req?.files) {
+                    imageFile.push(file?.filename);
+                }
             }
             else {
-                for (const file of req?.files) {
-                    images.push(file?.filename);
-                }
+                imageFile = req?.files[0]?.filename;
             }
         }
 
-        const data = images === '' ? { title, subtitle, updatedBy: userId } : { title, subtitle, description, image: images, video, updatedBy: userId }
+        const data = imageFile === null ? { title, subtitle, description, position, video, updatedBy: userId } : type === 'COMPANY_PROFILE' ? { video, file: imageFile, updatedBy: userId } : { title, subtitle, description, position, image: imageFile, video, updatedBy: userId }
 
         const componentUpdate = await Components.update(
             data,

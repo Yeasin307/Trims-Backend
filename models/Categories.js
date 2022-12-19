@@ -27,6 +27,9 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.TEXT,
             allowNull: false
         },
+        position: {
+            type: DataTypes.INTEGER
+        },
         active: {
             type: DataTypes.ENUM('1', '0'),
             allowNull: false,
