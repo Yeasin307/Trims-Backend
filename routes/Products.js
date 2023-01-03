@@ -119,16 +119,49 @@ router.get("/", verifyToken, async (req, res) => {
 router.get("/active", async (req, res) => {
     try {
         const products = await Products.findAll({
+            attributes: ['id', 'productName'],
             where: {
                 active: "1",
                 deleted: "0"
             },
             include: [
                 {
-                    as: 'categoryName',
-                    model: Categories
-                },
+                    attributes: ['image'],
+                    where: {
+                        deleted: '0'
+                    },
+                    as: 'productDetails',
+                    model: ProductImages
+                }
+            ]
+        });
+
+        if (!products) {
+            res.status(400).send("Bad Request!");
+        }
+        else {
+            res.status(200).send(products.slice(0, 8));
+        }
+    }
+    catch (error) {
+        res.status(401).send("Unauthorized!");
+    }
+});
+
+router.get("/category/:id", async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        const products = await Products.findAll({
+            attributes: ['id', 'productName', 'title', 'subTitle', 'description'],
+            where: {
+                categoryId: id,
+                active: "1",
+                deleted: "0"
+            },
+            include: [
                 {
+                    attributes: ['image'],
                     where: {
                         deleted: '0'
                     },
@@ -146,7 +179,7 @@ router.get("/active", async (req, res) => {
         }
     }
     catch (error) {
-        res.status(401).send("Unauthorized!");
+        res.status(400).send("Bad Request!");
     }
 });
 
@@ -154,18 +187,21 @@ router.get("/:id", async (req, res) => {
     try {
         const id = req.params.id;
 
-        const products = await Products.findAll({
+        const product = await Products.findOne({
+            attributes: ['id', 'productName', 'categoryId', 'title', 'subTitle', 'description', 'tags'],
             where: {
-                categoryId: id,
+                id: id,
                 active: "1",
                 deleted: "0"
             },
             include: [
                 {
+                    attributes: ['name'],
                     as: 'categoryName',
                     model: Categories
                 },
                 {
+                    attributes: ['image'],
                     where: {
                         deleted: '0'
                     },
@@ -174,11 +210,12 @@ router.get("/:id", async (req, res) => {
                 }
             ]
         });
-        if (!products) {
+
+        if (!product) {
             res.status(400).send("Bad Request!");
         }
         else {
-            res.status(200).send(products);
+            res.status(200).send(product);
         }
     }
     catch (error) {

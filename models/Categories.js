@@ -98,6 +98,7 @@ module.exports = (sequelize, DataTypes) => {
         Categories.hasMany(models.Products, {
             onDelete: 'RESTRICT',
             onUpdate: 'RESTRICT',
+            as: 'Products',
             sourceKey: 'id',
             foreignKey: {
                 name: 'categoryId'

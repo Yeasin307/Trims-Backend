@@ -3,7 +3,7 @@ const multer = require('multer');
 const sharp = require('sharp');
 const path = require("path");
 const router = express.Router();
-const { Users, Categories } = require("../models");
+const { Users, Categories, Products } = require("../models");
 const { verifyToken } = require("../middlewares/Auth");
 const { where } = require("sequelize");
 
@@ -84,28 +84,39 @@ router.get("/", verifyToken, async (req, res) => {
 router.get("/active", async (req, res) => {
     try {
         const categories = await Categories.findAll({
+            attributes: ['id', 'name'],
             where: {
                 active: '1',
                 deleted: '0'
             },
             order: [
                 ['position', 'ASC'],
-                [{ as: 'Child', model: Categories }, 'position', 'ASC']
+                // [{ as: 'Child', model: Categories }, 'position', 'ASC']
             ],
             include: [
                 {
-                    as: 'Parent',
-                    model: Categories
-                },
-                {
-                    as: 'Child',
-                    model: Categories,
+                    as: 'Products',
+                    model: Products,
+                    attributes: ['id', 'productName'],
                     where: {
                         active: '1',
                         deleted: '0'
                     },
                     required: false
-                }
+                },
+                // {
+                //     as: 'Parent',
+                //     model: Categories
+                // },
+                // {
+                //     as: 'Child',
+                //     model: Categories,
+                //     where: {
+                //         active: '1',
+                //         deleted: '0'
+                //     },
+                //     required: false
+                // }
             ]
         });
 
@@ -121,7 +132,7 @@ router.get("/active", async (req, res) => {
     }
 });
 
-router.post("/category-details", async (req, res) => {
+router.post("/category-details", verifyToken, async (req, res) => {
     try {
         const { id } = req.body;
         const category = await Categories.findOne({

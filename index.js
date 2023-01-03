@@ -40,7 +40,7 @@ db.sequelize.sync()
         });
 
         app.get('/', (req, res) => {
-            res.send('Welcome to Trims');
+            res.send('Welcome to Trim Tex');
         })
 
         app.listen(5000, () => {

@@ -38,28 +38,41 @@ router.post("/create", async (req, res) => {
     try {
         const { email, fullName, address, phone, subject, message } = req.body;
 
-        const lead = await Leads.create({ email, fullName, address, phone, subject, message });
+        const mailOptions = {
+            from: '"Trim Tex Contact Form" <info@trimtex-bd.com>',
+            to: 'info@trimtex-bd.com',
+            replyTo: email,
+            subject: subject,
+            html: `<div>
+                    <p>${message}</p>
+                    <br />
+                    <br />
+                    <h5 style="color:blue;">${fullName}</h5>
+                    <p>
+                        ${address}
+                        <br />
+                        ${email}
+                        <br />
+                        ${phone}
+                    </p>
+                    </div>`
+        };
 
-        if (!lead) {
-            res.status(400).json({ error: "Bad Request!" });
-        }
-        else {
-            const mailOptions = {
-                from: '"Trims" <noreply@asdfashionbd.com>',
-                to: 'info.trimtexbd@gmail.com',
-                replyTo: email,
-                subject: subject,
-                text: message
-            };
+        transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+                res.status(400).json({ error: "Bad Request!" });
+            } else {
+                res.status(200).send("Created lead successfully!");
+            }
+        });
 
-            transporter.sendMail(mailOptions, function (error, info) {
-                if (error) {
-                    res.status(400).json({ error: "Bad Request!" });
-                } else {
-                    res.status(200).send("Created lead successfully!");
-                }
-            });
-        }
+        // const lead = await Leads.create({ email, fullName, address, phone, subject, message });
+
+        // if (!lead) {
+        //     res.status(400).json({ error: "Bad Request!" });
+        // }
+        // else {
+        // }
     }
     catch (error) {
         res.status(401).json({ error: "error" });

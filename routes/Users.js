@@ -51,7 +51,7 @@ router.get("/confirmation/:token", async (req, res) => {
             });
 
         if (user[0] > 0) {
-            res.redirect('https://admin.asdfashionbd.com/login');
+            res.redirect('https://admin.trimtex-bd.com/login');
         }
         else {
             res.status(400).send('Bad Request!');
@@ -125,10 +125,10 @@ router.post("/create", verifyToken, async (req, res) => {
                                 }
                             );
 
-                            const url = `https://server.asdfashionbd.com/users/confirmation/${token}`
+                            const url = `https://server.trimtex-bd.com/users/confirmation/${token}`
 
                             const mailOptions = {
-                                from: '"Trims" <noreply@asdfashionbd.com>',
+                                from: '"Trim Tex" <info@trimtex-bd.com>',
                                 to: email,
                                 subject: 'Confirm Email',
                                 html: `Please click this link to confirm your email: <a href="${url}">${url}</a>`
@@ -187,10 +187,10 @@ router.post("/resendconfirmation", verifyToken, async (req, res) => {
                 }
             );
 
-            const url = `https://server.asdfashionbd.com/users/confirmation/${token}`
+            const url = `https://server.trimtex-bd.com/users/confirmation/${token}`
 
             const mailOptions = {
-                from: '"Trims" <noreply@asdfashionbd.com>',
+                from: '"Trim Tex" <info@trimtex-bd.com>',
                 to: email,
                 subject: 'Confirm Email',
                 html: `Please click this link to confirm your email: <a href="${url}">${url}</a>`
@@ -237,10 +237,10 @@ router.post("/forgot-password", async (req, res) => {
 
             const token = sign(payload, secret, { expiresIn: '30m' });
 
-            const url = `https://server.asdfashionbd.com/users/reset-password/${user.id}/${token}`;
+            const url = `https://server.trimtex-bd.com/users/reset-password/${user.id}/${token}`;
 
             const mailOptions = {
-                from: '"Trims" <noreply@asdfashionbd.com>',
+                from: '"Trim Tex" <info@trimtex-bd.com>',
                 to: email,
                 subject: 'Reset Password',
                 html: `Please click this link to reset your password: <a href="${url}">${url}</a>`
