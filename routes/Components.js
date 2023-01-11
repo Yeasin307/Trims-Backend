@@ -78,24 +78,248 @@ router.get("/", verifyToken, async (req, res) => {
     }
 });
 
-router.get("/active", async (req, res) => {
+router.get("/slider", async (req, res) => {
 
     try {
-        const components = await Components.findAll({
+        const slider = await Components.findAll({
+            attributes: ['id', 'image', 'title', 'subtitle'],
             where: {
                 active: "1",
-                deleted: "0"
+                deleted: "0",
+                type: 'HOME_SLIDER'
             },
             order: [
                 ['position', 'ASC']
             ]
         });
 
-        if (!components) {
+        if (!slider) {
             res.status(400).json({ error: "Bad Request!" });
         }
         else {
-            res.status(200).send(components);
+            res.status(200).send(slider);
+        }
+    }
+    catch (error) {
+        res.status(401).json({ error: error });
+    }
+});
+
+router.get("/about", async (req, res) => {
+
+    try {
+        const about = await Components.findOne({
+            attributes: ['id', 'image', 'title', 'subtitle', 'description'],
+            where: {
+                active: "1",
+                deleted: "0",
+                type: 'ABOUT_US'
+            }
+        });
+
+        if (!about) {
+            res.status(400).json({ error: "Bad Request!" });
+        }
+        else {
+            res.status(200).send(about);
+        }
+    }
+    catch (error) {
+        res.status(401).json({ error: error });
+    }
+});
+
+router.get("/vision", async (req, res) => {
+
+    try {
+        const vision = await Components.findOne({
+            attributes: ['id', 'title', 'description'],
+            where: {
+                active: "1",
+                deleted: "0",
+                type: 'VISION'
+            }
+        });
+
+        if (!vision) {
+            res.status(400).json({ error: "Bad Request!" });
+        }
+        else {
+            res.status(200).send(vision);
+        }
+    }
+    catch (error) {
+        res.status(401).json({ error: error });
+    }
+});
+
+router.get("/mission", async (req, res) => {
+
+    try {
+        const mission = await Components.findOne({
+            attributes: ['id', 'title', 'description'],
+            where: {
+                active: "1",
+                deleted: "0",
+                type: 'MISSION'
+            }
+        });
+
+        if (!mission) {
+            res.status(400).json({ error: "Bad Request!" });
+        }
+        else {
+            res.status(200).send(mission);
+        }
+    }
+    catch (error) {
+        res.status(401).json({ error: error });
+    }
+});
+
+router.get("/goal", async (req, res) => {
+
+    try {
+        const goal = await Components.findOne({
+            attributes: ['id', 'title', 'description'],
+            where: {
+                active: "1",
+                deleted: "0",
+                type: 'GOAL'
+            }
+        });
+
+        if (!goal) {
+            res.status(400).json({ error: "Bad Request!" });
+        }
+        else {
+            res.status(200).send(goal);
+        }
+    }
+    catch (error) {
+        res.status(401).json({ error: error });
+    }
+});
+
+router.get("/client", async (req, res) => {
+
+    try {
+        const client = await Components.findOne({
+            attributes: ['id', 'image', 'title', 'description'],
+            where: {
+                active: "1",
+                deleted: "0",
+                type: 'CLIENT'
+            }
+        });
+
+        if (!client) {
+            res.status(400).json({ error: "Bad Request!" });
+        }
+        else {
+            res.status(200).send(client);
+        }
+    }
+    catch (error) {
+        res.status(401).json({ error: error });
+    }
+});
+
+router.get("/gallery", async (req, res) => {
+
+    try {
+        const gallery = await Components.findAll({
+            attributes: ['id', 'image', 'title'],
+            where: {
+                active: "1",
+                deleted: "0",
+                type: 'GALLERY'
+            },
+            order: [
+                ['position', 'ASC']
+            ]
+        });
+
+        if (!gallery) {
+            res.status(400).json({ error: "Bad Request!" });
+        }
+        else {
+            res.status(200).send(gallery);
+        }
+    }
+    catch (error) {
+        res.status(401).json({ error: error });
+    }
+});
+
+router.get("/management", async (req, res) => {
+
+    try {
+        const management = await Components.findAll({
+            attributes: ['id', 'image', 'title', 'subtitle'],
+            where: {
+                active: "1",
+                deleted: "0",
+                type: 'MANAGEMENT'
+            },
+            order: [
+                ['position', 'ASC']
+            ]
+        });
+
+        if (!management) {
+            res.status(400).json({ error: "Bad Request!" });
+        }
+        else {
+            res.status(200).send(management);
+        }
+    }
+    catch (error) {
+        res.status(401).json({ error: error });
+    }
+});
+
+router.get("/message", async (req, res) => {
+
+    try {
+        const message = await Components.findOne({
+            attributes: ['id', 'image', 'title', 'description'],
+            where: {
+                active: "1",
+                deleted: "0",
+                type: 'CEO_MESSAGE'
+            }
+        });
+
+        if (!message) {
+            res.status(400).json({ error: "Bad Request!" });
+        }
+        else {
+            res.status(200).send(message);
+        }
+    }
+    catch (error) {
+        res.status(401).json({ error: error });
+    }
+});
+
+router.get("/profile", async (req, res) => {
+
+    try {
+        const profile = await Components.findOne({
+            attributes: ['id', 'file', 'video'],
+            where: {
+                active: "1",
+                deleted: "0",
+                type: 'COMPANY_PROFILE'
+            }
+        });
+
+        if (!profile) {
+            res.status(400).json({ error: "Bad Request!" });
+        }
+        else {
+            res.status(200).send(profile);
         }
     }
     catch (error) {
