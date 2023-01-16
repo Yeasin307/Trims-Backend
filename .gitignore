@@ -13,7 +13,6 @@
 
 # misc
 /config
-/uploads
 .DS_Store
 .env
 .env.local
