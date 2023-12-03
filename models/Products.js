@@ -38,6 +38,11 @@ module.exports = (sequelize, DataTypes) => {
         tags: {
             type: DataTypes.TEXT('long')
         },
+        isFeatured: {
+            type: DataTypes.ENUM('1', '0'),
+            allowNull: false,
+            defaultValue: '0'
+        },
         active: {
             type: DataTypes.ENUM('1', '0'),
             allowNull: false,

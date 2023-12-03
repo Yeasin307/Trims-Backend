@@ -116,15 +116,21 @@ router.get("/", verifyToken, async (req, res) => {
     }
 });
 
-router.get("/active", async (req, res) => {
+router.get("/featured", async (req, res) => {
     try {
         const products = await Products.findAll({
             attributes: ['id', 'productName'],
             where: {
+                isFeatured: "1",
                 active: "1",
                 deleted: "0"
             },
             include: [
+                {
+                    attributes: ['name'],
+                    as: 'categoryName',
+                    model: Categories
+                },
                 {
                     attributes: ['image'],
                     where: {
@@ -264,6 +270,30 @@ router.get("/viewproduct/:id", verifyToken, async (req, res) => {
     }
     catch (error) {
         res.status(401).send("Unauthorized!");
+    }
+});
+
+router.put("/select-featured", verifyToken, async (req, res) => {
+    try {
+        const { productId, userId, isFeatured } = req.body;
+
+        const productSelectFeatured = await Products.update(
+            { isFeatured, updatedBy: userId },
+            {
+                where: {
+                    id: productId
+                }
+            });
+
+        if (productSelectFeatured[0] > 0) {
+            res.status(200).send("Updated Product Successfully!");
+        }
+        else {
+            res.status(400).json({ error: "Bad Request!" });
+        }
+    }
+    catch (error) {
+        res.status(401).json({ error: "error" });
     }
 });
 
