@@ -6,9 +6,15 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: DataTypes.UUIDV4,
             primaryKey: true
         },
+        slug: {
+            type: DataTypes.STRING(128),
+            allowNull: false,
+            unique: true
+        },
         productName: {
             type: DataTypes.STRING(128),
-            allowNull: false
+            allowNull: false,
+            unique: true
         },
         categoryId: {
             type: DataTypes.UUID,

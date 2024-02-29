@@ -84,7 +84,7 @@ router.get("/", verifyToken, async (req, res) => {
 router.get("/active", async (req, res) => {
     try {
         const categories = await Categories.findAll({
-            attributes: ['id', 'name'],
+            attributes: ['id', 'name', 'slug'],
             where: {
                 active: '1',
                 deleted: '0'
@@ -97,7 +97,7 @@ router.get("/active", async (req, res) => {
                 {
                     as: 'Products',
                     model: Products,
-                    attributes: ['id', 'productName'],
+                    attributes: ['id', 'productName', 'slug'],
                     where: {
                         active: '1',
                         deleted: '0'

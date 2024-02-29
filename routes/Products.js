@@ -119,7 +119,7 @@ router.get("/", verifyToken, async (req, res) => {
 router.get("/featured", async (req, res) => {
     try {
         const products = await Products.findAll({
-            attributes: ['id', 'productName'],
+            attributes: ['id', 'productName', 'slug'],
             where: {
                 isFeatured: "1",
                 active: "1",
@@ -154,14 +154,19 @@ router.get("/featured", async (req, res) => {
     }
 });
 
-router.get("/category/:id", async (req, res) => {
+router.get("/category/:slug", async (req, res) => {
     try {
-        const id = req.params.id;
+        const slug = req.params.slug;
+
+        const category = await Categories.findOne({
+            attributes: ['id'],
+            where: { slug: slug }
+        })
 
         const products = await Products.findAll({
-            attributes: ['id', 'productName', 'title', 'subTitle', 'description'],
+            attributes: ['id', 'slug', 'productName', 'title', 'subTitle', 'description'],
             where: {
-                categoryId: id,
+                categoryId: category ? category.id : slug,
                 active: "1",
                 deleted: "0"
             },
@@ -189,14 +194,14 @@ router.get("/category/:id", async (req, res) => {
     }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:slug", async (req, res) => {
     try {
-        const id = req.params.id;
+        const slug = req.params.slug;
 
         const product = await Products.findOne({
-            attributes: ['id', 'productName', 'categoryId', 'title', 'subTitle', 'description', 'tags'],
+            attributes: ['id', 'slug', 'productName', 'categoryId', 'title', 'subTitle', 'description', 'tags'],
             where: {
-                id: id,
+                slug: slug,
                 active: "1",
                 deleted: "0"
             },
