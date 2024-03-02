@@ -2,6 +2,7 @@ const express = require("express");
 const multer = require('multer');
 const sharp = require('sharp');
 const path = require("path");
+const slugify = require('slugify');
 const router = express.Router();
 const { Users, Categories, Products } = require("../models");
 const { verifyToken } = require("../middlewares/Auth");
@@ -197,6 +198,15 @@ router.post("/create", verifyToken, upload.single("image"), async (req, res) => 
                     try {
                         let { name, description, parentId, position, userId } = req.body;
 
+                        const slug = slugify(name, {
+                            replacement: '_',
+                            remove: undefined,
+                            lower: true,
+                            strict: false,
+                            locale: 'en',
+                            trim: true
+                        });
+
                         if (parentId == '') {
                             parentId = null
                         }
@@ -205,7 +215,7 @@ router.post("/create", verifyToken, upload.single("image"), async (req, res) => 
                             position = 99999
                         }
 
-                        const category = await Categories.create({ name, description, parentId, image: req.file.filename, position, createdBy: userId, updatedBy: userId });
+                        const category = await Categories.create({ slug, name, description, parentId, image: req.file.filename, position, createdBy: userId, updatedBy: userId });
 
                         if (!category) {
                             res.status(400).json({ error: "Bad Request!" });
@@ -247,6 +257,15 @@ router.put("/update-with-image", verifyToken, upload.single("image"), async (req
                     try {
                         let { name, description, parentId, position, categoryId, userId } = req.body;
 
+                        const slug = slugify(name, {
+                            replacement: '_',
+                            remove: undefined,
+                            lower: true,
+                            strict: false,
+                            locale: 'en',
+                            trim: true
+                        });
+
                         if (parentId == '') {
                             parentId = null
                         }
@@ -256,7 +275,7 @@ router.put("/update-with-image", verifyToken, upload.single("image"), async (req
                         }
 
                         const categoryUpdate = await Categories.update(
-                            { name, description, parentId, image: req.file.filename, position, updatedBy: userId },
+                            { slug, name, description, parentId, image: req.file.filename, position, updatedBy: userId },
                             {
                                 where: {
                                     id: categoryId
@@ -288,6 +307,15 @@ router.put("/update-without-image", verifyToken, async (req, res) => {
         const { values, categoryId, userId } = req.body;
         let { name, description, parentId, position } = values;
 
+        const slug = slugify(name, {
+            replacement: '_',
+            remove: undefined,
+            lower: true,
+            strict: false,
+            locale: 'en',
+            trim: true
+        });
+
         if (parentId == '') {
             parentId = null
         }
@@ -297,7 +325,7 @@ router.put("/update-without-image", verifyToken, async (req, res) => {
         }
 
         const categoryUpdate = await Categories.update(
-            { name, description, parentId, position, updatedBy: userId },
+            { slug, name, description, parentId, position, updatedBy: userId },
             {
                 where: {
                     id: categoryId

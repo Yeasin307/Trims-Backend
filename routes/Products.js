@@ -1,6 +1,7 @@
 const express = require("express");
 const multer = require('multer');
 const path = require("path");
+const slugify = require('slugify');
 const router = express.Router();
 const { Users, Categories, Products, ProductImages } = require("../models");
 const db = require("../models");
@@ -46,11 +47,22 @@ const upload = multer({
 
 router.post("/create", verifyToken, upload.array("images", 5), async (req, res, next) => {
 
+    const t = await db.sequelize.transaction();
+
     try {
-        const t = await db.sequelize.transaction();
         const { name, categoryId, title, subtitle, description, tags, id } = req.body;
 
+        const slug = slugify(name, {
+            replacement: '_',
+            remove: undefined,
+            lower: true,
+            strict: false,
+            locale: 'en',
+            trim: true
+        });
+
         const product = await Products.create({
+            slug,
             productName: name,
             categoryId,
             title,
@@ -63,7 +75,7 @@ router.post("/create", verifyToken, upload.array("images", 5), async (req, res, 
 
         for (const file of req.files) {
             await ProductImages.create({
-                productId: product?.dataValues?.id,
+                productId: product?.id,
                 image: file.filename,
                 extension: path.extname(file.originalname),
                 createdBy: id,
@@ -352,12 +364,23 @@ router.put("/image-deleted", verifyToken, async (req, res) => {
 
 router.put("/update", verifyToken, upload.array("images", 4), async (req, res, next) => {
 
+    const t = await db.sequelize.transaction();
+
     try {
-        const t = await db.sequelize.transaction();
         const { id, name, categoryId, title, subtitle, description, tags, userId, } = req.body;
+
+        const slug = slugify(name, {
+            replacement: '_',
+            remove: undefined,
+            lower: true,
+            strict: false,
+            locale: 'en',
+            trim: true
+        });
 
         const productUpdate = await Products.update(
             {
+                slug,
                 productName: name,
                 categoryId,
                 title,
